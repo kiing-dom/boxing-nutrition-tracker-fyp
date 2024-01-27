@@ -9,6 +9,7 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "@react-native-picker/picker": "^2.6.1",
     "@react-navigation/native": "^6.1.9",
     "@react-navigation/native-stack": "^6.9.17",
     "@rneui/base": "^4.0.0-rc.7",
@@ -22,6 +23,7 @@
     "react-native-gesture-handler": "^2.14.1",
     "react-native-safe-area-context": "4.8.2",
     "react-native-screens": "~3.29.0",
+    "react-native-stepper-ui": "^0.0.9",
     "tailwindcss-react-native": "^1.7.10"
   },
   "devDependencies": {

@@ -21,7 +21,7 @@ export default function App() {
         <Stack.Navigator screenOptions={globalScreenOptions}>
           {/* Screens */}
           <Stack.Screen name='Login' component={LoginScreen} />
-          {/* {<Stack.Screen name="ProfileCreation" component={ProfileCreationScreen} />} */}
+          <Stack.Screen name="Profile Creation" component={ProfileCreationScreen} />
         </Stack.Navigator>
       </TailwindProvider>
     </NavigationContainer>
