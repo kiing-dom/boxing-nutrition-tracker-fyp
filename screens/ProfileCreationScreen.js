@@ -1,12 +1,22 @@
-import { View, Text } from 'react-native';
-import React from 'react';
+import { Text, StyleSheet, View } from 'react-native'
+import React, { Component } from 'react'
+import { Button, Input, Image } from '@rneui/themed'
+import { StatusBar } from 'expo-status-bar'
 
-const ProfileCreationScreen = () => {
-  return (
-    <View>
-      <Text>ProfileCreationScreen</Text>
-    </View>
-  )
+export default class ProfileCreationScreen extends Component {
+  render() {
+    return (
+      <View>
+        <StatusBar style='light' />
+        <Image
+            source={{
+                uri:
+                    "",
+            }}
+        />
+      </View>
+    )
+  }
 }
 
-export default ProfileCreationScreen
+const styles = StyleSheet.create({})
