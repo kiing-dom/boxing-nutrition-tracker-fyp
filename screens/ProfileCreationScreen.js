@@ -150,8 +150,9 @@ return [];
             onValueChange={handleGenderSelection}
             items={[
               { label: "Male", value: "Male" },
-              { label: "Female", value: "Female" },
+              { label: "Female", value: "Female" },            
             ]}
+            value={gender}
           />
 
           <Text style={{ fontSize: 16, marginBottom: 4 }}>Boxing Level</Text>
@@ -162,6 +163,7 @@ return [];
               { label: "Amateur", value: "Amateur" },
               { label: "Professional", value: "Professional" },
             ]}
+            value={boxingLevel}
           />
 
           {/* Picker to select desired weight class based on the selected Boxing Level and Gender */}
@@ -169,6 +171,7 @@ return [];
           <RNPickerSelect
             onValueChange={handleWeightClassSelection}
             items={getWeightClasses()} // Use the function to get weight classes
+            value={weightClass}
           />
           <Button title="Next" onPress={handleNextStep} color="#8868BD" disabled={!isNextButtonEnabled} />
         </View>
