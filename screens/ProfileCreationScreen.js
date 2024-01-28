@@ -130,10 +130,11 @@ return [];
     <View style={{ flex: 1, padding: 16 }}>
       <View style={{ backgroundColor: "#E5E5E5", height: 2, marginBottom: 8 }}>
         <View
+        //Progress Bar
           style={{
             backgroundColor: "#5A67D8",
             height: 2,
-            width: `${(step / 2) * 100}%`,
+            width: `${(step / 3) * 100}%`,
           }}
         />
       </View>
@@ -177,10 +178,18 @@ return [];
         </View>
       )}
 
-      {step === 2 && (
+      {step == 2 && (
+        <View>
+        <Text style={{ fontSize: 20, fontWeight: "bold", marginBottom: 8 }}>
+            Step 2: Personal Info
+          </Text>
+        </View>
+      )}
+
+      {step === 3 && (
         <View>
           <Text style={{ fontSize: 20, fontWeight: "bold", marginBottom: 8 }}>
-            Step 2: Account Details
+            Step 3: Account Details
           </Text>
           <Text style={{ fontSize: 16, marginBottom: 4 }}>Email</Text>
           <TextInput
