@@ -2,7 +2,6 @@ import { Text, StyleSheet, View, KeyboardAvoidingView } from 'react-native';
 import React, { useState } from 'react';
 import { Button, Input, Image, Icon } from '@rneui/themed';
 import { StatusBar } from 'expo-status-bar';
-import ProfileCreationScreen from './ProfileCreationScreen';
 
 const LoginScreen = ({ navigation }) => {
   //TODO: add the rest of the state variables
