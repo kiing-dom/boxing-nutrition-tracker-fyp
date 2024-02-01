@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { View, Button } from "react-native";
+import { View, Button, StyleSheet } from "react-native";
 import RNPickerSelect from "react-native-picker-select";
-import { Input, Text, Icon, TextInput } from "@rneui/themed";
+import { Input, Text, ButtonGroup } from "@rneui/themed";
 import axios from "axios";
 
 const ProfileCreationScreen = () => {
   // for step control
-  const [step, setStep] = useState(2);
+  const [step, setStep] = useState(1);
   // step 1: boxing information
   const [boxingLevel, setBoxingLevel] = useState("");
   const [gender, setGender] = useState("");
@@ -14,7 +14,17 @@ const ProfileCreationScreen = () => {
   //step 2: personal information
   const [age, setAge] = useState("");
   const [height, setHeight] = useState("");
+  const [currentWeight, setCurrentWeight] = useState("");
   const [location, setLocation] = useState("");
+
+  //step 3: Setting Goals
+  const [weightGoal, setWeightGoal] = useState("");
+  const [activityLevel, setActivityLevel] = useState("");
+
+  //step 4: Calculations
+  const [bmr, setBMR] = useState(0);
+  const [tdee, setTDEE] = useState(0);
+
   //step ??
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -30,8 +40,13 @@ const ProfileCreationScreen = () => {
   const [isAgeValid, setIsAgeValid] = useState(false);
   const [isHeightValid, setIsHeightValid] = useState(false);
   const [isLocationSelected, setIsLocationSelected] = useState(false);
+  const [isCurrentWeightValid, setIsCurrentWeightValid] = useState(false);
+  //step 3:
+  const [isWeightGoalSelected, setIsWeightGoalSelected] = useState(false);
+  const [isActivityLevelSelected, setIsActivityLevelSelected] = useState(false);
 
   //update selection status when a field is selected
+  //FOR STEP 1
   const handleGenderSelection = (value) => {
     setGender(value);
     setIsGenderSelected(value !== null);
@@ -47,9 +62,15 @@ const ProfileCreationScreen = () => {
     setIsWeightClassSelected(value !== null);
   };
 
+  //FOR STEP 2
   const handleAgeInput = (value) => {
     setAge(value);
     setIsAgeValid(value >= 16 && value <= 120);
+  };
+
+  const handleCurrentWeightChange = (value) => {
+    setCurrentWeight(value);
+    setIsCurrentWeightValid(value >= 14 && value <= 453);
   };
 
   const handleHeightChange = (value) => {
@@ -62,12 +83,66 @@ const ProfileCreationScreen = () => {
     setIsLocationSelected(value !== null);
   };
 
+  //FOR STEP 3
+  const handleWeightGoalSelection = (value) => {
+    setWeightGoal(weightGoals[value].label);
+    setIsWeightGoalSelected(value !== null);
+  };
+
+  const handleActivityLevelSelection = (value) => {
+    setActivityLevel(activityLevels[value].value);
+    setIsActivityLevelSelected(value !== null);
+  };
+
+  /**
+   * Implementing BMR logic based on user's profile data
+   * Using Mifflin-St Jeor Equation for Resting Metabolic Rate
+   * BMR for men: BMR = 10 * weight (kg) + 6.25 * height (cm) - 5 * age (years) + 5
+   * BMR for women: BMR = 10 * weight (kg) + 6.25 * height (cm) - 5 * age (years) - 161
+   */
+  const calculateBMR = () => {
+    if (gender === "Male") {
+      setBMR(10 * currentWeight + 6.25 * height - 5 * age + 5); // if male
+    } else {
+      setBMR(10 * currentWeight + 6.25 * height - 5 * age - 161); // if female
+    }
+  };
+
+  /**
+   * Implementing the TDEE calculation logic based on the user's BMR and activity level
+   * using the  Harris-Benedict Equation to estimate TDEE
+   * TDEE = BMR * Activity Multiplier
+   */
+  const calculateTDEE = () => {
+    const activityMultipliers = {
+      "Sedentary": 1.2,
+      "Lightly Active": 1.375,
+      "Moderately Active": 1.55,
+      "Very Active": 1.725,
+      "Extremely Active": 1.9,
+    };
+
+    const goalMultiplier = weightGoals.find(goal => goal.label === weightGoal)?.value || 0;
+
+    setTDEE(parseInt(bmr * activityMultipliers[activityLevel]) + goalMultiplier);
+  };
+
+  useEffect(() => {
+    if (step === 4) {
+      calculateBMR();
+      calculateTDEE();
+    }
+  }, [step, activityLevel]);
+
   //enable the "Next Button when all fields have a selection"
   const isStep1NextButtonEnabled =
     isGenderSelected && isBoxingLevelSelected && isWeightClassSelected;
 
-  const isStep2NextButtonEnabled = 
-    isAgeValid && isHeightValid && isLocationSelected;
+  const isStep2NextButtonEnabled =
+    isAgeValid && isCurrentWeightValid && isHeightValid && isLocationSelected;
+
+  const isStep3NextButtonEnabled =
+    isWeightGoalSelected && isActivityLevelSelected;
 
   //function to retrieve weightclasses based on boxingLevel and gender
   const getWeightClasses = () => {
@@ -223,6 +298,28 @@ const ProfileCreationScreen = () => {
     return [];
   };
 
+  const weightGoals = [
+    { label: "Lose Weight", value: -500 },
+    { label: "Maintain Weight", value: 0 },
+    { label: "Gain Weight", value: 500},
+  ];
+  const activityLevels = [
+    { label: "Sedentary (little or no exercise)", value: "Sedentary" },
+    {
+      label: "Lightly Active (1-3 days of exercise/week)",
+      value: "Lightly Active",
+    },
+    {
+      label: "Moderately Active (3-5 days of exercise/week)",
+      value: "Moderately Active",
+    },
+    { label: "Very Active (6-7 days of exercise/week)", value: "Very Active" },
+    {
+      label: "Extremely Active (twice daily exercise/physical job)",
+      value: "Extremely Active",
+    },
+  ];
+
   // using country-state-city API to handle the country values for the location step
   const [countryData, setCountryData] = useState([]);
   useEffect(() => {
@@ -255,6 +352,9 @@ const ProfileCreationScreen = () => {
 
   const handleNextStep = () => {
     setStep(step + 1);
+    console.log("After step increment", { step });
+    console.log("activity level is: ", { activityLevel });
+    console.log("weight goal level is: ", { weightGoal });
   };
 
   const handlePreviousStep = () => {
@@ -340,7 +440,7 @@ const ProfileCreationScreen = () => {
           </Text>
           {/** Numerical Input to handle setting the user's age */}
           <Text style={{ fontSize: 16, marginBottom: 4, marginTop: 32 }}>
-            How Old Are You?
+            How old are you?
           </Text>
           <Input
             placeholder="Age..."
@@ -358,7 +458,23 @@ const ProfileCreationScreen = () => {
             We use your age to calculate an accurate calorie goal for you.
           </Text>
 
-          {/* Slider to Select Height */}
+          {/* Numerical Input for Height */}
+          <Text style={{ fontSize: 16, marginBottom: 4, marginTop: 32 }}>
+            What is your current weight?
+          </Text>
+          <Input
+            placeholder="Weight (kg)..."
+            keyboardType="numeric"
+            value={currentWeight}
+            onChangeText={handleCurrentWeightChange}
+          />
+          {isCurrentWeightValid === false && currentWeight !== "" && (
+            <Text style={{ color: "red", marginBottom: 8, marginTop: -16 }}>
+              Invalid weight; please enter your correct weight
+            </Text>
+          )}
+
+          {/* Numerical Input for Height */}
           <Text style={{ fontSize: 16, marginBottom: 4, marginTop: 32 }}>
             How Tall Are You?
           </Text>
@@ -368,7 +484,6 @@ const ProfileCreationScreen = () => {
             value={height}
             onChangeText={handleHeightChange}
           />
-
           {isHeightValid === false && height !== "" && (
             <Text style={{ color: "red", marginBottom: 8, marginTop: -16 }}>
               Height must be between 60 and 243cm
@@ -415,49 +530,97 @@ const ProfileCreationScreen = () => {
       {step === 3 && (
         <View>
           <Text style={{ fontSize: 20, fontWeight: "bold", marginBottom: 8 }}>
-            Step 3:
+            Step 3: Goals
           </Text>
+          <Text style={{ fontSize: 16, marginBottom: 4, marginTop: 32 }}>
+            What is your goal?
+          </Text>
+          {/** Toggle Buttons to handle Goal choice */}
+          <ButtonGroup
+            buttons={weightGoals.map((goals) => goals.label)}
+            onPress={handleWeightGoalSelection}
+            value={weightGoal}
+            vertical
+            selectedIndex={weightGoals.findIndex(
+              (goal) => goal.label === weightGoal
+            )}
+            selectedButtonStyle={{ backgroundColor: "#8868BD" }}
+          />
+
+          <Text style={{ fontSize: 16, marginBottom: 4, marginTop: 32 }}>
+            What is your baseline activity level?
+          </Text>
+          <Text style={{ fontSize: 12, color: "grey" }}>
+            This will be used to calculate your calorie total
+          </Text>
+
+          <ButtonGroup
+            buttons={activityLevels.map((level) => level.label)}
+            onPress={handleActivityLevelSelection}
+            value={activityLevel}
+            vertical
+            selectedIndex={activityLevels.findIndex(
+              (level) => level.value === activityLevel
+            )}
+            selectedButtonStyle={{ backgroundColor: "#8868BD" }}
+          />
+
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "center",
+              marginTop: 32,
+            }}
+          >
+            <Button
+              title="Previous"
+              onPress={handlePreviousStep}
+              color="#7F7F7F"
+            />
+            <Button
+              title="Next"
+              onPress={handleNextStep}
+              color="#8868BD"
+              disabled={!isStep3NextButtonEnabled}
+            />
+          </View>
         </View>
       )}
 
       {step === 4 && (
         <View>
           <Text style={{ fontSize: 20, fontWeight: "bold", marginBottom: 8 }}>
-            Step ?: Account Details
+            Step 4: Calculations
           </Text>
-          <Text style={{ fontSize: 16, marginBottom: 4 }}>Email</Text>
-          <TextInput
+
+          {/* Display BMR and TDEE with improved styling */}
+          <View style={styles.resultContainer}>
+            <Text style={styles.resultLabel}>
+              Your Basal Metabolic Rate (BMR):
+            </Text>
+            <Text style={styles.resultValue}>{bmr} calories/day</Text>
+          </View>
+
+          <View style={styles.resultContainer}>
+            <Text style={styles.resultLabel}>
+              Your Total Daily Energy Expenditure (TDEE):
+            </Text>
+            <Text style={styles.resultValue}>{tdee} calories/day</Text>
+          </View>
+
+          <View
             style={{
-              height: 40,
-              borderColor: "gray",
-              borderWidth: 1,
-              marginBottom: 16,
-              padding: 8,
+              flexDirection: "row",
+              justifyContent: "center",
+              marginTop: 32,
             }}
-            value={email}
-            onChangeText={(text) => setEmail(text)}
-            keyboardType="email-address"
-          />
-          <Text style={{ fontSize: 16, marginBottom: 4 }}>Password</Text>
-          <TextInput
-            style={{
-              height: 40,
-              borderColor: "gray",
-              borderWidth: 1,
-              marginBottom: 16,
-              padding: 8,
-            }}
-            value={password}
-            onChangeText={(text) => setPassword(text)}
-            secureTextEntry
-          />
-          <View style={{ flexDirection: "row" }}>
+          >
             <Button
               title="Previous"
               onPress={handlePreviousStep}
               color="#7F7F7F"
             />
-            <Button title="Finish" onPress={handleNextStep} color="#5A67D8" />
+            {/* No need for a separate calculate button */}
           </View>
         </View>
       )}
@@ -465,3 +628,21 @@ const ProfileCreationScreen = () => {
   );
 };
 export default ProfileCreationScreen;
+
+const styles = StyleSheet.create({
+  resultContainer: {
+    marginBottom: 20,
+    padding: 16,
+    backgroundColor: "#F3F3F3",
+    borderRadius: 8,
+  },
+  resultLabel: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 8,
+  },
+  resultValue: {
+    fontSize: 18,
+    color: "#8868BD",
+  },
+});
