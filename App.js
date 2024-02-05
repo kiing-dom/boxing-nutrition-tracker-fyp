@@ -17,11 +17,11 @@ const globalScreenOptions = {
 export default function App() {
   return (
     <NavigationContainer>
-        <Stack.Navigator screenOptions={globalScreenOptions}>
+        <Stack.Navigator screenOptions={globalScreenOptions} gestureEnabled={false}>
           {/* Screens */}
           <Stack.Screen name='Login' component={LoginScreen} />
           <Stack.Screen name="Profile Creation" component={ProfileCreationScreen} options={{ title: "Create Your Profile"}} />
-          <Stack.Screen name='Home' component={HomeScreen} />
+          <Stack.Screen name='Home' component={HomeScreen} options={{ headerShown: false, gestureEnabled: false }} />
         </Stack.Navigator>
     </NavigationContainer>
   );
