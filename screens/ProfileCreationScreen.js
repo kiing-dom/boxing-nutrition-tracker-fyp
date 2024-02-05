@@ -1,12 +1,17 @@
-import React, { useEffect, useState } from "react";
-import { View, Button} from "react-native";
+import React, { useLayoutEffect, useEffect, useState } from "react";
+import { View, KeyboardAvoidingView } from "react-native";
 import axios from "axios";
 import BoxingInfoStep from "../components/profile-creation-components/BoxingInfoStep";
 import PersonalInfoStep from "../components/profile-creation-components/PersonalInfoStep";
 import GoalStep from "../components/profile-creation-components/GoalStep";
 import CalculateCalorieStep from "../components/profile-creation-components/CalculateCalorieStep";
+import { StatusBar } from "expo-status-bar";
+import RegisterProfileStep from "../components/profile-creation-components/RegisterProfileStep";
+import { app } from "../firebaseConfig";
+import { createUserWithEmailAndPassword, getAuth } from "firebase/auth";
+import { getFirestore, addDoc, collection } from "firebase/firestore";
 
-const ProfileCreationScreen = () => {
+const ProfileCreationScreen = ({ navigation }) => {
   // for step control
   const [step, setStep] = useState(1);
   // step 1: boxing information
@@ -46,6 +51,12 @@ const ProfileCreationScreen = () => {
   //step 3:
   const [isWeightGoalSelected, setIsWeightGoalSelected] = useState(false);
   const [isActivityLevelSelected, setIsActivityLevelSelected] = useState(false);
+
+  //step 5:
+  const [isFirstNameValid, setIsFirstNameValid] = useState(false);
+  const [isLastNameValid, setIsLastNameValid] = useState(false);
+  const [isEmailValid, setIsEmailValid] = useState(false);
+  const [isPasswordValid, setIsPasswordValid] = useState(false);
 
   //update selection status when a field is selected
   //FOR STEP 1
@@ -96,6 +107,25 @@ const ProfileCreationScreen = () => {
     setIsActivityLevelSelected(value !== null);
   };
 
+  //FOR STEP 5: REGISTRATION FORM
+  const handleFirstNameInput = (value) => {
+    setFirstName(value);
+    setIsFirstNameValid(value !== null || value !== "");
+  };
+
+  const handleLastNameInput = (value) => {
+    setLastName(value);
+    setIsLastNameValid(value !== null || value !== "");
+  };
+
+  const handleEmailInput = (value) => {
+    setEmail(value);
+  };
+
+  const handlePasswordInput = (value) => {
+    setPassword(value);
+  };
+
   /**
    * Implementing BMR logic based on user's profile data
    * Using Mifflin-St Jeor Equation for Resting Metabolic Rate
@@ -117,16 +147,19 @@ const ProfileCreationScreen = () => {
    */
   const calculateTDEE = () => {
     const activityMultipliers = {
-      "Sedentary": 1.2,
+      Sedentary: 1.2,
       "Lightly Active": 1.375,
       "Moderately Active": 1.55,
       "Very Active": 1.725,
       "Extremely Active": 1.9,
     };
 
-    const goalMultiplier = weightGoals.find(goal => goal.label === weightGoal)?.value || 0;
+    const goalMultiplier =
+      weightGoals.find((goal) => goal.label === weightGoal)?.value || 0;
 
-    setTDEE(parseInt(bmr * activityMultipliers[activityLevel]) + goalMultiplier);
+    setTDEE(
+      parseInt(bmr * activityMultipliers[activityLevel]) + goalMultiplier
+    );
   };
 
   useEffect(() => {
@@ -134,7 +167,16 @@ const ProfileCreationScreen = () => {
       calculateBMR();
       calculateTDEE();
     }
-  }, [step, activityLevel]);
+  }, [
+    step,
+    gender,
+    currentWeight,
+    height,
+    age,
+    weightGoal,
+    bmr,
+    activityLevel,
+  ]);
 
   //enable the "Next Button when all fields have a selection"
   const isStep1NextButtonEnabled =
@@ -150,7 +192,7 @@ const ProfileCreationScreen = () => {
   const weightGoals = [
     { label: "Lose Weight", value: -500 },
     { label: "Maintain Weight", value: 0 },
-    { label: "Gain Weight", value: 500},
+    { label: "Gain Weight", value: 500 },
   ];
   const activityLevels = [
     { label: "Sedentary (little or no exercise)", value: "Sedentary" },
@@ -210,27 +252,140 @@ const ProfileCreationScreen = () => {
     setStep(step - 1);
   };
 
+  const register = async () => {
+    try {
+      const auth = getAuth(app);
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+  
+      // Create a new user document in Firestore
+      const db = getFirestore(app);
+      const docRef = await addDoc(collection(db, "users"), {
+        // Add all the user data you want to store, e.g.,
+        uid: user.uid,
+        firstName,
+        lastName,
+        email,
+        boxingLevel,
+        weightClass,
+        age,
+        currentWeight,
+        height,
+        location,
+        weightGoal,
+        activityLevel,
+        bmr,
+        tdee,
+        gender,
+        password
+      });
+  
+      console.log("Document written with ID: ", docRef.id);
+      // Handle successful registration (e.g., navigate to a different screen)
+    } catch (error) {
+      console.error("Registration error: ", error);
+      // Handle registration errors (e.g., display an error message)
+    }
+  };
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerBackTitle: "Back to Login",
+    });
+  }, [navigation]);
+
   return (
-    <View style={{ flex: 1, padding: 16 }}>
+    <KeyboardAvoidingView behavior="padding" style={{ flex: 1, padding: 16 }}>
+      <StatusBar style="light" />
       <View style={{ backgroundColor: "#E5E5E5", height: 4, marginBottom: 8 }}>
         <View
           //Progress Bar
           style={{
             backgroundColor: "#5A67D8",
             height: 4,
-            width: `${(step / 4) * 100}%`,
+            width: `${(step / 5) * 100}%`,
           }}
         />
       </View>
       {/* STEP 1: BOXING INFORMATION*/}
-      {step === 1 && <BoxingInfoStep {...{ gender, boxingLevel, weightClass, handleGenderSelection, handleBoxingLevelSelection, handleWeightClassSelection, isStep1NextButtonEnabled, handleNextStep}} />}
-      {/* STEP 2: PERSONAL INFORMATION */}    
-      {step == 2 && <PersonalInfoStep {...{ age, currentWeight, height, location, handleAgeInput, handleCurrentWeightChange, handleHeightChange, handleLocationSelection, isStep2NextButtonEnabled, handleNextStep, handlePreviousStep, isAgeValid, isCurrentWeightValid, isHeightValid, countryData }} /> }
+      {step === 1 && (
+        <BoxingInfoStep
+          {...{
+            gender,
+            boxingLevel,
+            weightClass,
+            handleGenderSelection,
+            handleBoxingLevelSelection,
+            handleWeightClassSelection,
+            isStep1NextButtonEnabled,
+            handleNextStep,
+          }}
+        />
+      )}
+      {/* STEP 2: PERSONAL INFORMATION */}
+      {step == 2 && (
+        <PersonalInfoStep
+          {...{
+            age,
+            currentWeight,
+            height,
+            location,
+            handleAgeInput,
+            handleCurrentWeightChange,
+            handleHeightChange,
+            handleLocationSelection,
+            isStep2NextButtonEnabled,
+            handleNextStep,
+            handlePreviousStep,
+            isAgeValid,
+            isCurrentWeightValid,
+            isHeightValid,
+            countryData,
+          }}
+        />
+      )}
 
-      {step === 3 && <GoalStep {...{ weightGoal, activityLevel, handleWeightGoalSelection, handleActivityLevelSelection, isStep3NextButtonEnabled, handleNextStep, handlePreviousStep, weightGoals, activityLevels }} /> }
-        
-      {step === 4 && <CalculateCalorieStep {...{ bmr, tdee, handlePreviousStep }} /> }
-    </View>
+      {step === 3 && (
+        <GoalStep
+          {...{
+            weightGoal,
+            activityLevel,
+            handleWeightGoalSelection,
+            handleActivityLevelSelection,
+            isStep3NextButtonEnabled,
+            handleNextStep,
+            handlePreviousStep,
+            weightGoals,
+            activityLevels,
+          }}
+        />
+      )}
+
+      {step === 4 && (
+        <CalculateCalorieStep
+          {...{ bmr, tdee, handlePreviousStep, handleNextStep }}
+        />
+      )}
+
+      {step === 5 && (
+        <RegisterProfileStep
+          {...{
+            firstName,
+            lastName,
+            email,
+            password,
+            handleFirstNameInput,
+            handleLastNameInput,
+            handleEmailInput,
+            handlePasswordInput,
+            handlePreviousStep,
+            register,
+          }}
+        />
+      )}
+
+      <View style={{ height: 24 }} />
+    </KeyboardAvoidingView>
   );
 };
 export default ProfileCreationScreen;

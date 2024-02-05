@@ -82,7 +82,7 @@ GoalStep.propTypes = {
   weightGoals: PropTypes.arrayOf(
     PropTypes.shape({
       label: PropTypes.string.isRequired,
-      value: PropTypes.string.isRequired,
+      value: PropTypes.number.isRequired,
     })
   ).isRequired,
   activityLevels: PropTypes.arrayOf(
