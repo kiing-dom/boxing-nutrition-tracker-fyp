@@ -226,7 +226,7 @@ const BoxingInfoStep = ({ gender, boxingLevel, weightClass,
 BoxingInfoStep.propTypes = {
     gender: PropTypes.string.isRequired,
     boxingLevel: PropTypes.string.isRequired,
-    weightClass: PropTypes.string.isRequired,
+    weightClass: PropTypes.string,
     handleGenderSelection: PropTypes.func.isRequired,
     handleBoxingLevelSelection: PropTypes.func.isRequired,
     handleWeightClassSelection: PropTypes.func.isRequired,
