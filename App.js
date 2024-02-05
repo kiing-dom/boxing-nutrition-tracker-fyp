@@ -17,7 +17,7 @@ const globalScreenOptions = {
 export default function App() {
   return (
     <NavigationContainer>
-        <Stack.Navigator screenOptions={globalScreenOptions} gestureEnabled={false}>
+        <Stack.Navigator screenOptions={globalScreenOptions}>
           {/* Screens */}
           <Stack.Screen name='Login' component={LoginScreen} />
           <Stack.Screen name="Profile Creation" component={ProfileCreationScreen} options={{ title: "Create Your Profile"}} />
