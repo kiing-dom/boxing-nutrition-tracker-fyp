@@ -1,5 +1,5 @@
 import React, { useLayoutEffect, useEffect, useState } from "react";
-import { View, KeyboardAvoidingView } from "react-native";
+import { View, KeyboardAvoidingView, Alert } from "react-native";
 import axios from "axios";
 import BoxingInfoStep from "../components/profile-creation-components/BoxingInfoStep";
 import PersonalInfoStep from "../components/profile-creation-components/PersonalInfoStep";
