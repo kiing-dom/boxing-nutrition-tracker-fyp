@@ -281,12 +281,22 @@ const ProfileCreationScreen = ({ navigation }) => {
       });
   
       console.log("Document written with ID: ", docRef.id);
-      // Handle successful registration (e.g., navigate to a different screen)
-    } catch (error) {
-      console.error("Registration error: ", error);
-      // Handle registration errors (e.g., display an error message)
-    }
-  };
+
+    // Alert and redirect
+    Alert.alert(
+      "Success!",
+      "Profile created successfully!",
+      [
+        { text: "OK", onPress: () => navigation.navigate('Login') }, // Replace 'Login' with your login screen name
+      ],
+      { cancelable: false } // Disable closing without selecting an option
+    );
+
+  } catch (error) {
+    console.error("Registration error: ", error);
+    // Handle registration errors
+  }
+};
 
   useLayoutEffect(() => {
     navigation.setOptions({
