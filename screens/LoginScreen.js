@@ -1,18 +1,17 @@
-import { Text, StyleSheet, View, KeyboardAvoidingView, Alert } from "react-native";
+import { StyleSheet, View, KeyboardAvoidingView, Alert } from "react-native";
 import React, { useState } from "react";
-import { Button, Input, Image, Icon } from "@rneui/themed";
+import { Button, Input, Icon } from "@rneui/themed";
 import { StatusBar } from "expo-status-bar";
-import { signInWithEmailAndPassword, getAuth } from "firebase/auth";
-import { app } from "../firebaseConfig";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../firebaseConfig";
+import PropTypes from 'prop-types';
 
 const LoginScreen = ({ navigation }) => {
-  //TODO: add the rest of the state variables
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const logIn = async () => {
     try {
-      const auth = getAuth(auth);
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
@@ -75,6 +74,10 @@ const LoginScreen = ({ navigation }) => {
       <View style={{ height: 100 }} />
     </KeyboardAvoidingView>
   );
+};
+
+LoginScreen.propTypes = {
+  navigation: PropTypes.object.isRequired, // Assuming navigation is an object and is required
 };
 
 export default LoginScreen;

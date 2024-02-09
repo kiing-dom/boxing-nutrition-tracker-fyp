@@ -1,12 +1,20 @@
-import { View, Text } from 'react-native';
-import React from 'react';
+import React from "react";
+import { View, Text, StyleSheet } from "react-native";
+import BottomNav from "../components/navigation/BottomNav";
 
 const HomeScreen = () => {
   return (
-    <View>
-      <Text>HomeScreen</Text>
+    <View style={styles.container}>
+      <BottomNav />
     </View>
-  )
+  );
 };
 
 export default HomeScreen;
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    
+  },
+});

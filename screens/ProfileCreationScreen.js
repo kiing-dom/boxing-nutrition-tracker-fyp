@@ -7,8 +7,8 @@ import GoalStep from "../components/profile-creation-components/GoalStep";
 import CalculateCalorieStep from "../components/profile-creation-components/CalculateCalorieStep";
 import { StatusBar } from "expo-status-bar";
 import RegisterProfileStep from "../components/profile-creation-components/RegisterProfileStep";
-import { app } from "../firebaseConfig";
-import { createUserWithEmailAndPassword, getAuth } from "firebase/auth";
+import { app, auth } from "../firebaseConfig";
+import { createUserWithEmailAndPassword } from "firebase/auth";
 import { getFirestore, addDoc, collection } from "firebase/firestore";
 
 const ProfileCreationScreen = ({ navigation }) => {
@@ -147,7 +147,7 @@ const ProfileCreationScreen = ({ navigation }) => {
    */
   const calculateTDEE = () => {
     const activityMultipliers = {
-      Sedentary: 1.2,
+      "Sedentary": 1.2,
       "Lightly Active": 1.375,
       "Moderately Active": 1.55,
       "Very Active": 1.725,
@@ -254,7 +254,6 @@ const ProfileCreationScreen = ({ navigation }) => {
 
   const register = async () => {
     try {
-      const auth = getAuth(app);
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
   

@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app'; 
 // Optionally import the services that you want to use
-import "firebase/auth";
+import { browserLocalPersistence, getAuth } from 'firebase/auth';
 // import {...} from "firebase/database";
 import "firebase/firestore";
 // import {...} from "firebase/functions";
@@ -18,3 +18,6 @@ const firebaseConfig = {
   };
 
 export const app = initializeApp(firebaseConfig);
+export const auth = getAuth(app, {
+  persistence: browserLocalPersistence,
+})
