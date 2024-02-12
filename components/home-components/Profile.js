@@ -1,14 +1,14 @@
 import { StyleSheet, Text, View, Alert } from "react-native";
 import React, { useEffect, useState } from "react";
 import { Button } from "@rneui/themed";
-import { auth, db } from "../../firebaseConfig";
+import { auth, db } from "../../firebaseConfig"; // Replace with your actual path
 import { signOut, onAuthStateChanged } from "firebase/auth";
-import { doc, getDocs, collection, query, where} from "firebase/firestore";
+import { doc, getDocs, collection, query, where } from "firebase/firestore";
 
 const Profile = ({ navigation }) => {
   const [user, setUser] = useState(null);
   const [userData, setUserData] = useState(null);
-  const [loading, setLoading] = useState(false); // Add loading state
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -19,15 +19,14 @@ const Profile = ({ navigation }) => {
           setLoading(true);
 
           // Construct the reference with a filter to match current user's uid
-          const userRef = collection(db, "users")
-            where("uid", "==", user.uid)
-
-          const querySnapshot = await getDocs(userRef);
+          const userRef = collection(db, "users");
+          const querySnapshot = await getDocs(
+            query(userRef, where("uid", "==", user.uid))
+          );
 
           if (querySnapshot.empty) {
             console.error("No user document found");
-            // Handle the case where no document matches the filter
-            // (e.g., display message, redirect to create profile)
+            // Handle the case: display a message or redirect to create profile
           } else {
             const userDoc = querySnapshot.docs[0]; // Access the first (and only) document
             setUserData(userDoc.data());
@@ -54,7 +53,6 @@ const Profile = ({ navigation }) => {
     );
   }
 
-  // Function to handle user sign out and navigation
   const handleSignOut = async () => {
     try {
       Alert.alert(
@@ -80,10 +78,12 @@ const Profile = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <View>
-        <Text>Welcome, {userData.firstName}</Text>
-        
-      </View>
+      {loading && <Text>Loading user data...</Text>}
+      {!loading && userData && (
+        <View>
+          <Text>Welcome, {userData.firstName}</Text>
+        </View>
+      )}
       <Button style={styles.button} title="Sign Out" onPress={handleSignOut} raised />
     </View>
   );
