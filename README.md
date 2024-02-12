@@ -12,7 +12,6 @@ This is a nutrition tracker app designed specifically for boxers.
 - [Technologies Used](#technologies-used)
 - [Folder Structure](#folder-structure)
 - [Firebase Configuration](#firebase-configuration)
-- [Tailwind CSS](#tailwind-css)
 - [License](#license)
 
 ## Installation
