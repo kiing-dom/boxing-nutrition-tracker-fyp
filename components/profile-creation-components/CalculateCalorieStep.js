@@ -7,7 +7,7 @@ const CalculateCalorieStep = ({ bmr, tdee, handlePreviousStep, handleNextStep })
   return (
     <View>
       <Text style={{ fontSize: 20, fontWeight: "bold", marginBottom: 8 }}>
-        Step 4: Calculate Calories
+        Calorie Goal
       </Text>
 
       {/* Display BMR and TDEE with improved styling */}

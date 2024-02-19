@@ -17,7 +17,7 @@ const GoalStep = ({
   return (
     <View>
       <Text style={{ fontSize: 20, fontWeight: "bold", marginBottom: 8 }}>
-        Step 3: Goals
+        Goals
       </Text>
       <Text style={{ fontSize: 16, marginBottom: 4, marginTop: 32 }}>
         What is your goal?

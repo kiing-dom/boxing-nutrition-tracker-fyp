@@ -28,7 +28,7 @@ const PersonalInfoStep = ({
   return (
     <View>
       <Text style={{ fontSize: 20, fontWeight: "bold", marginBottom: 8 }}>
-        Step 2: Personal Info
+        Personal Information
       </Text>
       {/** Numerical Input to handle setting the user's age */}
       <Text style={{ fontSize: 16, marginBottom: 4, marginTop: 32 }}>
