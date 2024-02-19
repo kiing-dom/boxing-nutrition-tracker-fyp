@@ -166,7 +166,7 @@ const BoxingInfoStep = ({ gender, boxingLevel, weightClass,
   return (
     <View>
           <Text style={{ fontSize: 20, fontWeight: "bold", marginBottom: 8 }}>
-            Step 1: Boxing Information
+            Boxing Information
           </Text>
 
           <Text style={{ fontSize: 16, marginBottom: 4 }}>Gender</Text>
