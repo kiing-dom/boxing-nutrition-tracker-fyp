@@ -1,15 +1,15 @@
 import { StyleSheet, Text, View } from 'react-native'
 import React from 'react'
 
-const MealPlans = () => {
+const Suggestions = () => {
   return (
     <View style={styles.container}>
-      <Text>Meal Plans</Text>
+      <Text>AI Suggestions</Text>
     </View>
   )
 }
 
-export default MealPlans
+export default Suggestions
 
 const styles = StyleSheet.create({
     container: {

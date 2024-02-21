@@ -1,7 +1,7 @@
 import { initializeApp } from 'firebase/app'; 
-// Optionally import the services that you want to use
-import { getAuth, browserLocalPersistence } from 'firebase/auth';
+import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const firebaseConfig = {
     apiKey: "AIzaSyCf00d51GJxE-LRI2Bs1v3U8DeYQtxpMfs",
@@ -17,6 +17,6 @@ const firebaseConfig = {
 
 export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app, {
-  persistence: browserLocalPersistence,
+  persistence: AsyncStorage,
 });
 export const db = getFirestore(app)

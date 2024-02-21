@@ -4,7 +4,7 @@ import { createMaterialBottomTabNavigator } from "react-native-paper/react-navig
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import LogMealScreen from "../home-components/LogMeals";
 import Dashboard from "../home-components/Dashboard";
-import MealPlans from "../home-components/MealPlans";
+import Suggestions from "../home-components/Suggestions";
 import Profile from "../home-components/Profile";
 
 const Tab = createMaterialBottomTabNavigator();
@@ -51,13 +51,13 @@ const BottomNav = () => {
       />
       <Tab.Screen
         name="Meal Plans"
-        component={MealPlans}
+        component={Suggestions}
         options={{
-          tabBarLabel: "Meal Plans",
+          tabBarLabel: "Suggestions",
           tabBarIcon: ({ color, size }) => {
             return (
               <MaterialCommunityIcons
-                name="food-apple"
+                name="lightbulb"
                 color={"#FFFFFF"}
                 size={24}
               />
