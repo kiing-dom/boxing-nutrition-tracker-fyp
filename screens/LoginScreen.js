@@ -1,14 +1,29 @@
 import { StyleSheet, View, KeyboardAvoidingView, Alert } from "react-native";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button, Input, Icon } from "@rneui/themed";
 import { StatusBar } from "expo-status-bar";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../firebaseConfig";
 import PropTypes from 'prop-types';
+import { TextInput } from "react-native-paper";
+
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  useEffect(() => {
+    // Check for existing session on component mount
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (user) {
+        // User is already signed in, redirect to HomeScreen
+        navigation.navigate("Home");
+      }
+    });
+
+    // Cleanup function to unsubscribe from listener
+    return () => unsubscribe();
+  }, []);
 
   const logIn = async () => {
     try {
@@ -34,21 +49,23 @@ const LoginScreen = ({ navigation }) => {
   };
 
   return (
-    <KeyboardAvoidingView behavior="padding" style={styles.container}>
+    <KeyboardAvoidingView backgroundColor='#FFFFFF' behavior="padding" style={styles.container}>
       <StatusBar style="light" />
       <Icon name="lock-closed" type="ionicon" color="#8868BD" size={150} />
       <View style={styles.inputContainer}>
-        <Input
-          placeholder="Email"
-          autoFocus
-          type="Email"
+        <TextInput
+          label="Email"
+          mode="outlined" // Use outlined mode for a clear visual style
+          autoCapitalize="none"
+          autoCorrect={false}
+          keyboardType="email-address"
           value={email}
           onChangeText={(text) => setEmail(text)}
         />
-        <Input
-          placeholder="Password"
+        <TextInput
+          label="Password"
+          mode="outlined"
           secureTextEntry
-          type="password"
           value={password}
           onChangeText={(text) => setPassword(text)}
         />
@@ -64,17 +81,17 @@ const LoginScreen = ({ navigation }) => {
       {/* Register Button */}
       <Button
         raised
-        buttonStyle={{ borderColor: "8868BD", backgroundColor: "transparent" }}
+        buttonStyle={{ borderColor: "#8868BD", backgroundColor: "transparent" }}
         titleStyle={{ color: "#8868BD" }}
         onPress={() => navigation.navigate("Profile Creation")}
         containerStyle={styles.button}
-        type="outline"
-        title="Don't Have a Profile? Register!"
+        title="Register"
       />
       <View style={{ height: 100 }} />
     </KeyboardAvoidingView>
   );
 };
+
 
 LoginScreen.propTypes = {
   navigation: PropTypes.object.isRequired, // Assuming navigation is an object and is required

@@ -1,8 +1,9 @@
-import { View, Button} from "react-native";
+import { View, Button, StyleSheet, ScrollView, FlatList } from "react-native";
 import React from "react";
 import PropTypes from "prop-types";
 import { Input, Text } from "@rneui/themed";
-import RNPickerSelect from 'react-native-picker-select'
+import RNPickerSelect from "react-native-picker-select";
+import { TextInput } from "react-native-paper";
 
 const PersonalInfoStep = ({
   age,
@@ -19,12 +20,8 @@ const PersonalInfoStep = ({
   isAgeValid,
   isCurrentWeightValid,
   isHeightValid,
-  countryData
-
+  countryData,
 }) => {
-
-
-
   return (
     <View>
       <Text style={{ fontSize: 20, fontWeight: "bold", marginBottom: 8 }}>
@@ -34,51 +31,49 @@ const PersonalInfoStep = ({
       <Text style={{ fontSize: 16, marginBottom: 4, marginTop: 32 }}>
         How old are you?
       </Text>
-      <Input
-        placeholder="Age..."
+      <TextInput
+        label="Age..."
         keyboardType="numeric"
         value={age}
         onChangeText={handleAgeInput}
+        mode="flat" // Optional: Set the text input mode (flat, outlined, or filled)
+        error={!isAgeValid && age !== ""}
+        style={{ marginTop: 0, marginBottom: 24 }}
       />
-      {/** if the age isnt valid render the error message  */}
+
       {isAgeValid === false && age !== "" && (
         <Text style={{ color: "red", marginBottom: 8, marginTop: -16 }}>
           Age must be between 16 and 120
         </Text>
       )}
-      <Text style={{ marginTop: -8 }}>
-        We use your age to calculate an accurate calorie goal for you.
-      </Text>
 
-      {/* Numerical Input for Height */}
-      <Text style={{ fontSize: 16, marginBottom: 4, marginTop: 32 }}>
-        What is your current weight?
-      </Text>
-      <Input
-        placeholder="Weight (kg)..."
+      <TextInput
+        label="Weight (kg)..."
         keyboardType="numeric"
         value={currentWeight}
         onChangeText={handleCurrentWeightChange}
+        style={{ marginTop: 0, marginBottom: 24 }}
+        error={!isCurrentWeightValid && currentWeight != ""}
       />
+
       {isCurrentWeightValid === false && currentWeight !== "" && (
         <Text style={{ color: "red", marginBottom: 8, marginTop: -16 }}>
-          Invalid weight; please enter your correct weight
+          Weight must be between 13 and 453
         </Text>
       )}
 
-      {/* Numerical Input for Height */}
-      <Text style={{ fontSize: 16, marginBottom: 4, marginTop: 32 }}>
-        How Tall Are You?
-      </Text>
-      <Input
-        placeholder="Height (cm)..."
+      <TextInput
+        label="Height (cm)..."
         keyboardType="numeric"
         value={height}
         onChangeText={handleHeightChange}
+        style={{ marginTop: 0, marginBottom: 24 }}
+        error={!isHeightValid && height != ""}
       />
-      {isHeightValid === false && height !== "" && (
+
+{isHeightValid === false && height !== "" && (
         <Text style={{ color: "red", marginBottom: 8, marginTop: -16 }}>
-          Height must be between 60 and 243cm
+          Enter a Valid Height
         </Text>
       )}
 
@@ -92,6 +87,7 @@ const PersonalInfoStep = ({
         Location
       </Text>
       <RNPickerSelect
+        style={pickerStyle}
         onValueChange={handleLocationSelection}
         items={countryData} // get countries from the countryData array
         value={location}
@@ -117,21 +113,47 @@ const PersonalInfoStep = ({
 };
 
 PersonalInfoStep.propTypes = {
-    age: PropTypes.string.isRequired,
-    currentWeight: PropTypes.string.isRequired,
-    height: PropTypes.string.isRequired,
-    location: PropTypes.string.isRequired,
-    handleAgeInput: PropTypes.func.isRequired,
-    handleCurrentWeightChange: PropTypes.func.isRequired,
-    handleHeightChange: PropTypes.func.isRequired,
-    handleLocationSelection: PropTypes.func.isRequired,
-    isStep2NextButtonEnabled: PropTypes.bool.isRequired,
-    handleNextStep: PropTypes.func.isRequired,
-    handlePreviousStep: PropTypes.func.isRequired,
-    isAgeValid: PropTypes.bool.isRequired,
-    isCurrentWeightValid: PropTypes.bool.isRequired,
-    isHeightValid: PropTypes.bool.isRequired,
-    countryData: PropTypes.array.isRequired,
-  };
+  age: PropTypes.string.isRequired,
+  currentWeight: PropTypes.string.isRequired,
+  height: PropTypes.string.isRequired,
+  location: PropTypes.string.isRequired,
+  handleAgeInput: PropTypes.func.isRequired,
+  handleCurrentWeightChange: PropTypes.func.isRequired,
+  handleHeightChange: PropTypes.func.isRequired,
+  handleLocationSelection: PropTypes.func.isRequired,
+  isStep2NextButtonEnabled: PropTypes.bool.isRequired,
+  handleNextStep: PropTypes.func.isRequired,
+  handlePreviousStep: PropTypes.func.isRequired,
+  isAgeValid: PropTypes.bool.isRequired,
+  isCurrentWeightValid: PropTypes.bool.isRequired,
+  isHeightValid: PropTypes.bool.isRequired,
+  countryData: PropTypes.array.isRequired,
+};
 
 export default PersonalInfoStep;
+
+const pickerStyle = StyleSheet.create({
+  inputIOS: {
+    fontSize: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: "gray",
+    borderRadius: 4,
+    color: "black",
+    paddingRight: 30, // to make space for the arrow
+  },
+  inputAndroid: {
+    fontSize: 16,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderWidth: 1,
+    borderColor: "gray",
+    borderRadius: 8,
+    color: "black",
+    paddingRight: 30, // to make space for the arrow
+  },
+  placeholder: {
+    color: "gray",
+  },
+});

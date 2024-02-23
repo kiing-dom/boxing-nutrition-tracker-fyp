@@ -1,5 +1,7 @@
 import React, { useLayoutEffect, useEffect, useState } from "react";
-import { View, KeyboardAvoidingView, Alert } from "react-native";
+import { View, KeyboardAvoidingView, Alert, StyleSheet } from "react-native";
+import { ProgressBar } from "react-native-paper";
+import { Text } from "@rneui/themed";
 import axios from "axios";
 import BoxingInfoStep from "../components/profile-creation-components/BoxingInfoStep";
 import PersonalInfoStep from "../components/profile-creation-components/PersonalInfoStep";
@@ -147,7 +149,7 @@ const ProfileCreationScreen = ({ navigation }) => {
    */
   const calculateTDEE = () => {
     const activityMultipliers = {
-      "Sedentary": 1.2,
+      Sedentary: 1.2,
       "Lightly Active": 1.375,
       "Moderately Active": 1.55,
       "Very Active": 1.725,
@@ -254,9 +256,13 @@ const ProfileCreationScreen = ({ navigation }) => {
 
   const register = async () => {
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
       const user = userCredential.user;
-  
+
       // Create a new user document in Firestore
       const db = getFirestore(app);
       const docRef = await addDoc(collection(db, "users"), {
@@ -276,26 +282,25 @@ const ProfileCreationScreen = ({ navigation }) => {
         bmr,
         tdee,
         gender,
-        password
+        password,
       });
-  
+
       console.log("Document written with ID: ", docRef.id);
 
-    // Alert and redirect
-    Alert.alert(
-      "Success!",
-      "Profile created successfully!",
-      [
-        { text: "OK", onPress: () => navigation.navigate('Login') }, // Replace 'Login' with your login screen name
-      ],
-      { cancelable: false } // Disable closing without selecting an option
-    );
-
-  } catch (error) {
-    console.error("Registration error: ", error);
-    // Handle registration errors
-  }
-};
+      // Alert and redirect
+      Alert.alert(
+        "Success!",
+        "Profile created successfully!",
+        [
+          { text: "OK", onPress: () => navigation.navigate("Login") }, // Replace 'Login' with your login screen name
+        ],
+        { cancelable: false } // Disable closing without selecting an option
+      );
+    } catch (error) {
+      console.error("Registration error: ", error);
+      // Handle registration errors
+    }
+  };
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -304,18 +309,20 @@ const ProfileCreationScreen = ({ navigation }) => {
   }, [navigation]);
 
   return (
-    <KeyboardAvoidingView behavior="padding" style={{ flex: 1, padding: 16 }}>
+    <KeyboardAvoidingView
+      backgroundColor="#FFFFFF"
+      behavior="padding"
+      style={{ flex: 1, padding: 16 }}
+    >
       <StatusBar style="light" />
       <View style={{ backgroundColor: "#E5E5E5", height: 4, marginBottom: 8 }}>
-        <View
-          //Progress Bar
-          style={{
-            backgroundColor: "#5A67D8",
-            height: 4,
-            width: `${(step / 5) * 100}%`,
-          }}
+        <ProgressBar
+          progress={step / 5} // Set progress based on current step
+          color="#000" // Set color of progress bar
+          style={{ borderRadius: 2 }} // Add rounded corners
         />
       </View>
+      <Text style={{ textAlign: "left", fontSize: 12 }}>Step {step} of 5</Text>
       {/* STEP 1: BOXING INFORMATION*/}
       {step === 1 && (
         <BoxingInfoStep
@@ -398,3 +405,9 @@ const ProfileCreationScreen = ({ navigation }) => {
   );
 };
 export default ProfileCreationScreen;
+
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: "#FFFFFF",
+  },
+});
