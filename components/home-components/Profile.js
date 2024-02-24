@@ -54,6 +54,7 @@ const Profile = ({ navigation }) => {
   const handleSignOut = async () => {
     try {
       await signOut(auth);
+      await AsyncStorage.removeItem("userToken");
       navigation.navigate("Login");
     } catch (error) {
       console.error("Error during sign out:", error);
