@@ -19,7 +19,7 @@ export default function App() {
     <NavigationContainer>
         <Stack.Navigator screenOptions={globalScreenOptions}>
           {/* Screens */}
-          <Stack.Screen name='Login' component={LoginScreen} />
+          <Stack.Screen name='Login' component={LoginScreen} gestureEnabled={false} options={{ headerShown: false, gestureEnabled: false }}/>
           <Stack.Screen name="Profile Creation" component={ProfileCreationScreen} options={{ title: "Create Your Profile"}} />
           <Stack.Screen name='Home' component={HomeScreen} options={{ headerShown: false, gestureEnabled: false }} />
         </Stack.Navigator>

@@ -1,9 +1,10 @@
-import { View, Button, StyleSheet, ScrollView, FlatList } from "react-native";
+import { View, StyleSheet, ScrollView, FlatList } from "react-native";
 import React from "react";
 import PropTypes from "prop-types";
-import { Input, Text } from "@rneui/themed";
+import { Input, Text, Button } from "@rneui/themed";
 import RNPickerSelect from "react-native-picker-select";
 import { TextInput } from "react-native-paper";
+
 
 const PersonalInfoStep = ({
   age,
@@ -28,9 +29,6 @@ const PersonalInfoStep = ({
         Personal Information
       </Text>
       {/** Numerical Input to handle setting the user's age */}
-      <Text style={{ fontSize: 16, marginBottom: 4, marginTop: 32 }}>
-        How old are you?
-      </Text>
       <TextInput
         label="Age..."
         keyboardType="numeric"
@@ -71,16 +69,11 @@ const PersonalInfoStep = ({
         error={!isHeightValid && height != ""}
       />
 
-{isHeightValid === false && height !== "" && (
+      {isHeightValid === false && height !== "" && (
         <Text style={{ color: "red", marginBottom: 8, marginTop: -16 }}>
           Enter a Valid Height
         </Text>
       )}
-
-      <Text style={{ marginTop: -8 }}>
-        Your height is also a very important factor in calculating an accurate
-        calorie goal for you.
-      </Text>
 
       {/* Picker to select Location using the Country State City API */}
       <Text style={{ fontSize: 16, marginBottom: 4, marginTop: 16 }}>

@@ -1,4 +1,4 @@
-import { StyleSheet, View, KeyboardAvoidingView, Alert } from "react-native";
+import { StyleSheet, View, KeyboardAvoidingView, Alert} from "react-native";
 import React, { useState, useEffect } from "react";
 import { Button, Input, Icon } from "@rneui/themed";
 import { StatusBar } from "expo-status-bar";
@@ -6,24 +6,27 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../firebaseConfig";
 import PropTypes from 'prop-types';
 import { TextInput } from "react-native-paper";
-
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   useEffect(() => {
-    // Check for existing session on component mount
-    const unsubscribe = auth.onAuthStateChanged((user) => {
-      if (user) {
-        // User is already signed in, redirect to HomeScreen
+    checkLoginStatus();
+  }, []);
+
+  const checkLoginStatus = async () => {
+    try {
+      const userToken = await AsyncStorage.getItem('userToken');
+      if (userToken) {
+        // User is already logged in, redirect to HomeScreen
         navigation.navigate("Home");
       }
-    });
-
-    // Cleanup function to unsubscribe from listener
-    return () => unsubscribe();
-  }, []);
+    } catch (error) {
+      console.error("Error checking login status:", error);
+    }
+  };
 
   const logIn = async () => {
     try {
@@ -32,6 +35,9 @@ const LoginScreen = ({ navigation }) => {
 
       // Successful login
       console.log("Login successful:", user);
+
+      // Store user data in AsyncStorage
+      await AsyncStorage.setItem('userToken', JSON.stringify(user)); // Store user data
 
       // Navigate to desired screen or perform other actions
       navigation.navigate("Home"); // Replace 'HomeScreen' with your intended screen

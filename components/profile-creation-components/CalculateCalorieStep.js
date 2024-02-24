@@ -1,5 +1,5 @@
-import { View, Button, StyleSheet } from "react-native";
-import { Text } from "@rneui/themed";
+import { View, StyleSheet } from "react-native";
+import { Text, Button } from "@rneui/themed";
 import React from "react";
 import PropTypes from "prop-types";
 

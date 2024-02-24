@@ -2,7 +2,6 @@ import React from "react";
 import { View, StyleSheet } from "react-native";
 import { Text, Button } from "@rneui/themed";
 import RNPickerSelect from "react-native-picker-select";
-import DropDownPicker from "react-native-dropdown-picker";
 import PropTypes from "prop-types";
 
 const BoxingInfoStep = ({

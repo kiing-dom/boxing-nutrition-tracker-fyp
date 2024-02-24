@@ -1,6 +1,6 @@
 import React from "react";
-import { View, Button } from "react-native";
-import { ButtonGroup, Text } from "@rneui/themed";
+import { View } from "react-native";
+import { ButtonGroup, Text, Button } from "@rneui/themed";
 import PropTypes from "prop-types";
 
 const GoalStep = ({
