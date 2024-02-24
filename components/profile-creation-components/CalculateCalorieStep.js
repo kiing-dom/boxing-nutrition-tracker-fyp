@@ -32,7 +32,7 @@ const CalculateCalorieStep = ({ bmr, tdee, handlePreviousStep, handleNextStep })
       >
         <Button title="Previous" onPress={handlePreviousStep} color="#7F7F7F" />
 
-        <Button title="Create an Account" onPress={handleNextStep} color="#757de8" />
+        <Button title="Next" onPress={handleNextStep} color="#8868BD" />
         {/* No need for a separate calculate button */}
       </View>
     </View>

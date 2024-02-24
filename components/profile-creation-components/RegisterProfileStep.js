@@ -1,6 +1,7 @@
 import React from "react";
 import { KeyboardAvoidingView, View, StyleSheet } from "react-native";
 import { Text, Input, Button } from "@rneui/themed";
+import { TextInput } from "react-native-paper";
 
 const RegisterProfileStep = ({
   firstName,
@@ -15,34 +16,38 @@ const RegisterProfileStep = ({
   register
 }) => {
   return (
-    <View behavior="padding" style={styles.container}>
-      <Text h3 style={{ marginBottom: 50 }}>
-        Create your Account
+    <View style={styles.container}>
+      <Text h4 style={{ marginBottom: 12, marginRight: 150 }}>
+        Create an Account
       </Text>
 
       <View style={styles.inputContainer}>
-        <Input
+        <TextInput
           placeholder="First Name..."
           value={firstName}
           onChangeText={handleFirstNameInput}
+          style={{marginBottom: 16}}
         />
-        <Input
+        <TextInput
           placeholder="Last Name..."
           value={lastName}
           onChangeText={handleLastNameInput}
+          style={{marginBottom: 16}}
         />
-        <Input
+        <TextInput
             placeholder="Email..."
             value={email}
             onChangeText={handleEmailInput}
+            style={{marginBottom: 16}}
             type="email-address"
         />
-        <Input 
+        <TextInput 
             placeholder="Password..."
             secureTextEntry
             value={password}
             onChangeText={handlePasswordInput}
             onSubmitEditing={register}
+            style={{marginBottom: 16}}
         />
       </View>
 
@@ -57,7 +62,7 @@ const RegisterProfileStep = ({
         <Button
           containerStyle={styles.button}
           raised
-          title="Register"
+          title="Create an Account"
           onPress={register}
           color="#8868BD"
         />
@@ -72,13 +77,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: "center",
-    justifyContent: "center",
     padding: 10,
     backgroundColor: "white"
   },
   buttonContainer: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "space-evenly",
     width: "100%",
     alignItems: "center", // Align buttons vertically within container
   },
@@ -96,6 +100,6 @@ const styles = StyleSheet.create({
   },
 
   inputContainer: {
-    width: 300
+    width: 325,
   }
 });
