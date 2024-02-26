@@ -7,10 +7,20 @@ import { auth } from "../firebaseConfig";
 import PropTypes from 'prop-types';
 import { TextInput } from "react-native-paper";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useFonts } from "expo-font";
+import AppLoading from "expo-app-loading";
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  let [fontsLoaded] = useFonts({
+    'Montserrat-Regular': require('../assets/fonts/Montserrat-Regular.ttf')
+  })
+
+  if(!fontsLoaded) {
+    return <AppLoading />
+  }
 
   useEffect(() => {
     checkLoginStatus();
@@ -83,15 +93,17 @@ const LoginScreen = ({ navigation }) => {
         onPress={logIn}
         containerStyle={styles.button}
         title="Login"
+        titleStyle={{ fontFamily: 'Montserrat-Regular' }}
       />
       {/* Register Button */}
       <Button
         raised
         buttonStyle={{ borderColor: "#8868BD", backgroundColor: "transparent" }}
-        titleStyle={{ color: "#8868BD" }}
+        titleStyle={{ color: "#8868BD", fontFamily: 'Montserrat-Regular' }}
         onPress={() => navigation.navigate("Profile Creation")}
         containerStyle={styles.button}
         title="Register"
+        
       />
       <View style={{ height: 100 }} />
     </KeyboardAvoidingView>
@@ -114,6 +126,7 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     width: 300,
+    marginBottom: 24
   },
 
   button: {
