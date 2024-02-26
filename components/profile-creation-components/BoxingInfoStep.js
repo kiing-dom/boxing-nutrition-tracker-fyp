@@ -2,6 +2,8 @@ import React from "react";
 import { View, StyleSheet } from "react-native";
 import { Text, Button } from "@rneui/themed";
 import RNPickerSelect from "react-native-picker-select";
+import { useFonts } from "expo-font";
+import AppLoading from "expo-app-loading";
 import PropTypes from "prop-types";
 
 const BoxingInfoStep = ({
@@ -167,20 +169,29 @@ const BoxingInfoStep = ({
     return [];
   };
 
+  let [fontsLoaded] = useFonts({
+    'Montserrat-Regular': require('../../assets/fonts/Montserrat-Regular.ttf'),
+    'Montserrat-SemiBold': require('../../assets/fonts/Montserrat-SemiBold.ttf')
+  })
+
+  if(!fontsLoaded) {
+    return <AppLoading />
+  }
+
   return (
     <View>
-      <Text style={{ fontSize: 20, fontWeight: "bold", marginBottom: 0 }}>
+      <Text style={{ fontFamily: 'Montserrat-SemiBold', fontSize: 20, marginBottom: 0 }}>
         Boxing Information
       </Text>
 
-      <Text style={{ fontSize: 12, fontStyle: "italic", marginBottom: 24 }}>
+      <Text style={{ fontFamily: 'Montserrat-Regular', fontSize: 12, marginBottom: 24 }}>
         Here you will be asked for your sex and boxing level, in order to
         calculate the correct weight class options.
       </Text>
 
-      <Text style={{ fontSize: 16, marginBottom: 4 }}>Sex</Text>
+      <Text style={{ fontFamily: 'Montserrat-SemiBold', fontSize: 16, marginBottom: 4 }}>Sex</Text>
       {/* Picker to Select Gender */}
-      <Text style={{ fontSize: 12, fontStyle: "italic", marginBottom: 0 }}>
+      <Text style={{ fontFamily: 'Montserrat-Regular', fontSize: 12,  marginBottom: 0 }}>
         Please select your biological sex to ensure we calculate an accurate
         calorie goal for you.
       </Text>
@@ -194,7 +205,7 @@ const BoxingInfoStep = ({
         value={gender}
       />
 
-      <Text style={{ fontSize: 16, marginBottom: 4, marginTop: 30 }}>
+      <Text style={{ fontFamily: 'Montserrat-SemiBold', fontSize: 16, marginBottom: 4, marginTop: 30 }}>
         Boxing Level
       </Text>
       {/* Picker to Select Boxing Level */}
@@ -209,7 +220,7 @@ const BoxingInfoStep = ({
       />
 
       {/* Picker to select desired weight class based on the selected Boxing Level and Gender */}
-      <Text style={{ fontSize: 16, marginBottom: 4, marginTop: 30 }}>
+      <Text style={{ fontFamily: 'Montserrat-SemiBold', fontSize: 16, marginBottom: 4, marginTop: 30 }}>
         Desired Weight Class
       </Text>
       <RNPickerSelect
