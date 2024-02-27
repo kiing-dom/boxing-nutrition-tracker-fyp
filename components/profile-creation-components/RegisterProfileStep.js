@@ -1,7 +1,9 @@
-import React from "react";
-import { KeyboardAvoidingView, View, StyleSheet } from "react-native";
-import { Text, Input, Button } from "@rneui/themed";
+import React, {useState, useEffect } from "react";
+import { View, StyleSheet } from "react-native";
+import { Text, Button } from "@rneui/themed";
 import { TextInput } from "react-native-paper";
+import { loadAsync } from "expo-font";
+import * as SplashScreen from "expo-splash-screen";
 
 const RegisterProfileStep = ({
   firstName,
@@ -15,9 +17,35 @@ const RegisterProfileStep = ({
   handlePreviousStep,
   register
 }) => {
+
+  const [fontsLoaded, setFontsLoaded] = useState(false);
+
+  useEffect(() => {
+    const preventHide = SplashScreen.preventAutoHideAsync();
+
+    // Load fonts here
+    const loadFonts = async () => {
+      await loadAsync({
+        "Montserrat-Regular": require("../../assets/fonts/Montserrat-Regular.ttf"),
+        "Montserrat-SemiBold": require("../../assets/fonts/Montserrat-SemiBold.ttf"),
+      });
+      setFontsLoaded(true);
+    };
+
+    loadFonts().then(() => {
+      SplashScreen.hideAsync();
+    });
+
+    return () => preventHide;
+  }, []);
+
+  if (!fontsLoaded) {
+    return null; // Return nothing while fonts are loading
+  }
+
   return (
     <View style={styles.container}>
-      <Text h4 style={{ marginBottom: 12, marginRight: 150 }}>
+      <Text style={{fontFamily:"Montserrat-Regular", fontSize: 24, marginBottom: 12, marginRight: 100 }}>
         Create an Account
       </Text>
 
@@ -57,6 +85,7 @@ const RegisterProfileStep = ({
           title="Previous"
           onPress={handlePreviousStep}
           color="#7F7F7F"
+          titleStyle={{ fontFamily:"Montserrat-Regular"}}
         />
 
         <Button
@@ -65,6 +94,7 @@ const RegisterProfileStep = ({
           title="Create an Account"
           onPress={register}
           color="#8868BD"
+          titleStyle={{ fontFamily:"Montserrat-Regular"}}
         />
       </View>
     </View>

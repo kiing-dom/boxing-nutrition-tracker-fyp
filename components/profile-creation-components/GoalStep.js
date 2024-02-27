@@ -14,17 +14,35 @@ const GoalStep = ({
   weightGoals,
   activityLevels,
 }) => {
-
   return (
     <View>
-      <Text style={{ fontFamily: "Montserrat-SemiBold", fontSize: 20, marginBottom: 8 }}>
+      <Text
+        style={{
+          fontFamily: "Montserrat-SemiBold",
+          fontSize: 20,
+          marginBottom: 8,
+        }}
+      >
         Goals
       </Text>
-      <Text style={{ fontFamily: "Montserrat-Regular" ,fontSize: 12, color: "grey" }}>
+      <Text
+        style={{
+          fontFamily: "Montserrat-Regular",
+          fontSize: 12,
+          color: "grey",
+        }}
+      >
         This will be used to calculate your calorie total
       </Text>
 
-      <Text style={{ fontFamily: "Montserrat-SemiBold", fontSize: 16, marginBottom: 4, marginTop: 32 }}>
+      <Text
+        style={{
+          fontFamily: "Montserrat-SemiBold",
+          fontSize: 16,
+          marginBottom: 4,
+          marginTop: 32,
+        }}
+      >
         Goal
       </Text>
       {/** Toggle Buttons to handle Goal choice */}
@@ -37,13 +55,19 @@ const GoalStep = ({
           (goal) => goal.label === weightGoal
         )}
         selectedButtonStyle={{ backgroundColor: "#8868BD" }}
-        textStyle={{fontFamily: "Montserrat-Regular"}}
+        textStyle={{ fontFamily: "Montserrat-Regular" }}
       />
 
-      <Text style={{ fontFamily: "Montserrat-SemiBold", fontSize: 16, marginBottom: 4, marginTop: 32 }}>
+      <Text
+        style={{
+          fontFamily: "Montserrat-SemiBold",
+          fontSize: 16,
+          marginBottom: 4,
+          marginTop: 32,
+        }}
+      >
         Activity Level
       </Text>
-      
 
       <ButtonGroup
         buttons={activityLevels.map((level) => level.label)}
@@ -54,7 +78,7 @@ const GoalStep = ({
           (level) => level.value === activityLevel
         )}
         selectedButtonStyle={{ backgroundColor: "#8868BD" }}
-        textStyle={{fontFamily: "Montserrat-Regular"}}
+        textStyle={{ fontFamily: "Montserrat-Regular" }}
       />
 
       <View
@@ -64,12 +88,19 @@ const GoalStep = ({
           marginTop: 32,
         }}
       >
-        <Button title="Previous" onPress={handlePreviousStep} color="#7F7F7F" />
+        <Button 
+          title="Previous" 
+          onPress={handlePreviousStep} 
+          color="#7F7F7F" 
+          titleStyle={{ fontFamily:"Montserrat-Regular" }}
+        />
         <Button
+          raised
           title="Next"
           onPress={handleNextStep}
           color="#8868BD"
           disabled={!isStep3NextButtonEnabled}
+          titleStyle={{ fontFamily:"Montserrat-Regular" }}
         />
       </View>
     </View>
