@@ -7,7 +7,7 @@ import { auth } from "../firebaseConfig";
 import PropTypes from 'prop-types';
 import { TextInput } from "react-native-paper";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useFonts, loadAsync } from "expo-font";
+import { loadAsync } from "expo-font";
 import * as SplashScreen from 'expo-splash-screen'
 
 const LoginScreen = ({ navigation }) => {

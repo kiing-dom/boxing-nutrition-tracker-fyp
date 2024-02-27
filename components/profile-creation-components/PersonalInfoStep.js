@@ -1,10 +1,11 @@
 import { View, StyleSheet, ScrollView, FlatList } from "react-native";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import { Input, Text, Button } from "@rneui/themed";
 import RNPickerSelect from "react-native-picker-select";
 import { TextInput } from "react-native-paper";
-
+import { loadAsync } from "expo-font";
+import * as SplashScreen from 'expo-splash-screen' 
 
 const PersonalInfoStep = ({
   age,
@@ -23,9 +24,35 @@ const PersonalInfoStep = ({
   isHeightValid,
   countryData,
 }) => {
+
+  const [fontsLoaded, setFontsLoaded] = useState(false);
+
+  useEffect(() => {
+    const preventHide = SplashScreen.preventAutoHideAsync();
+
+    // Load fonts here
+    const loadFonts = async () => {
+      await loadAsync({
+        'Montserrat-Regular': require('../../assets/fonts/Montserrat-Regular.ttf'),
+        'Montserrat-SemiBold': require('../../assets/fonts/Montserrat-SemiBold.ttf')
+      });
+      setFontsLoaded(true);
+    };
+
+    loadFonts().then(() => {
+      SplashScreen.hideAsync();
+    });
+
+    return () => preventHide;
+  }, []);
+
+  if (!fontsLoaded) {
+    return null; // Return nothing while fonts are loading
+  }
+
   return (
     <View>
-      <Text style={{ fontSize: 20, fontWeight: "bold", marginBottom: 8 }}>
+      <Text style={{ fontSize: 20, marginBottom: 8, fontFamily: "Montserrat-SemiBold" }}>
         Personal Information
       </Text>
       {/** Numerical Input to handle setting the user's age */}
@@ -37,6 +64,7 @@ const PersonalInfoStep = ({
         mode="flat" // Optional: Set the text input mode (flat, outlined, or filled)
         error={!isAgeValid && age !== ""}
         style={{ marginTop: 0, marginBottom: 24 }}
+        contentStyle={{ fontFamily: "Montserrat-Regular" }}
       />
 
       {isAgeValid === false && age !== "" && (
@@ -52,6 +80,7 @@ const PersonalInfoStep = ({
         onChangeText={handleCurrentWeightChange}
         style={{ marginTop: 0, marginBottom: 24 }}
         error={!isCurrentWeightValid && currentWeight != ""}
+        contentStyle={{ fontFamily: "Montserrat-Regular" }}
       />
 
       {isCurrentWeightValid === false && currentWeight !== "" && (
@@ -67,6 +96,7 @@ const PersonalInfoStep = ({
         onChangeText={handleHeightChange}
         style={{ marginTop: 0, marginBottom: 24 }}
         error={!isHeightValid && height != ""}
+        contentStyle={{ fontFamily: "Montserrat-Regular" }}
       />
 
       {isHeightValid === false && height !== "" && (
@@ -76,7 +106,7 @@ const PersonalInfoStep = ({
       )}
 
       {/* Picker to select Location using the Country State City API */}
-      <Text style={{ fontSize: 16, marginBottom: 4, marginTop: 16 }}>
+      <Text style={{fontFamily: "Montserrat-Regular", fontSize: 16, marginBottom: 4, marginTop: 16 }}>
         Location
       </Text>
       <RNPickerSelect
@@ -84,6 +114,7 @@ const PersonalInfoStep = ({
         onValueChange={handleLocationSelection}
         items={countryData} // get countries from the countryData array
         value={location}
+        
       />
 
       <View
@@ -93,12 +124,18 @@ const PersonalInfoStep = ({
           marginTop: 32,
         }}
       >
-        <Button title="Previous" onPress={handlePreviousStep} color="#7F7F7F" />
+        <Button 
+          title="Previous" 
+          onPress={handlePreviousStep} 
+          color="#7F7F7F"
+          titleStyle={{ fontFamily: 'Montserrat-Regular' }}
+        />
         <Button
           title="Next"
           onPress={handleNextStep}
           color="#8868BD"
           disabled={!isStep2NextButtonEnabled}
+          titleStyle={{ fontFamily: 'Montserrat-Regular' }}
         />
       </View>
     </View>
@@ -109,7 +146,7 @@ PersonalInfoStep.propTypes = {
   age: PropTypes.string.isRequired,
   currentWeight: PropTypes.string.isRequired,
   height: PropTypes.string.isRequired,
-  location: PropTypes.string.isRequired,
+  location: PropTypes.string,
   handleAgeInput: PropTypes.func.isRequired,
   handleCurrentWeightChange: PropTypes.func.isRequired,
   handleHeightChange: PropTypes.func.isRequired,

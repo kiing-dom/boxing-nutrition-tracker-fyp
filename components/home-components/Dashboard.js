@@ -1,16 +1,33 @@
-import { StyleSheet, Text, View } from 'react-native'
-import React from 'react'
-import { useFonts } from 'expo-font'
-import AppLoading from 'expo-app-loading'
+import { StyleSheet, Text, View } from 'react-native';
+import React, { useState, useEffect} from 'react';
+import { loadAsync } from 'expo-font';
+import * as SplashScreen from 'expo-splash-screen';
 
 const Dashboard = () => {
 
-  let [fontsLoaded] = useFonts({
-    'Montserrat-Regular': require('../../assets/fonts/Montserrat-Regular.ttf')
-  })
+  const [fontsLoaded, setFontsLoaded] = useState(false);
 
-  if(!fontsLoaded) {
-    return <AppLoading />
+  useEffect(() => {
+    const preventHide = SplashScreen.preventAutoHideAsync();
+
+    // Load fonts here
+    const loadFonts = async () => {
+      await loadAsync({
+        'Montserrat-Regular': require('../../assets/fonts/Montserrat-Regular.ttf'),
+        'Montserrat-SemiBold': require('../../assets/fonts/Montserrat-SemiBold.ttf')
+      });
+      setFontsLoaded(true);
+    };
+
+    loadFonts().then(() => {
+      SplashScreen.hideAsync();
+    });
+
+    return () => preventHide;
+  }, []);
+
+  if (!fontsLoaded) {
+    return null; // Return nothing while fonts are loading
   }
 
   return (

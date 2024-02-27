@@ -2,8 +2,7 @@ import React, { useState, useEffect } from "react";
 import { View, StyleSheet } from "react-native";
 import { Text, Button } from "@rneui/themed";
 import RNPickerSelect from "react-native-picker-select";
-import { useFonts, loadAsync } from "expo-font";
-import AppLoading from "expo-app-loading";
+import { loadAsync } from "expo-font";
 import PropTypes from "prop-types";
 import * as SplashScreen from 'expo-splash-screen'
 
@@ -212,8 +211,9 @@ const BoxingInfoStep = ({
         Please select your biological sex to ensure we calculate an accurate
         calorie goal for you.
       </Text>
+
       <RNPickerSelect
-        placeholder={{ label: "Choose your sex...", value: null }}
+        placeholder={{ label: "Choose your sex...", value: null, color: "grey"}}
         onValueChange={handleGenderSelection}
         items={[
           { label: "Male", value: "Male" },
@@ -227,7 +227,7 @@ const BoxingInfoStep = ({
       </Text>
       {/* Picker to Select Boxing Level */}
       <RNPickerSelect
-        placeholder={{ label: "Choose your boxing level...", value: null }}
+        placeholder={{ label: "Choose your boxing level...", value: null, color: "grey" }}
         onValueChange={handleBoxingLevelSelection}
         items={[
           { label: "Amateur", value: "Amateur" },
@@ -241,7 +241,7 @@ const BoxingInfoStep = ({
         Desired Weight Class
       </Text>
       <RNPickerSelect
-        placeholder={{ label: "Choose a weight class...", value: null }}
+        placeholder={{ label: "Choose a weight class...", value: null, color: "grey" }}
         onValueChange={handleWeightClassSelection}
         items={getWeightClasses()} // Use the function to get weight classes
         value={weightClass}
@@ -256,6 +256,7 @@ const BoxingInfoStep = ({
         <Button
           buttonStyle={{paddingLeft: 24, paddingRight: 24}}
           title="Next"
+          raised
           onPress={handleNextStep}
           color="#8868BD"
           disabled={!isStep1NextButtonEnabled}

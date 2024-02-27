@@ -14,13 +14,18 @@ const GoalStep = ({
   weightGoals,
   activityLevels,
 }) => {
+
   return (
     <View>
-      <Text style={{ fontSize: 20, fontWeight: "bold", marginBottom: 8 }}>
+      <Text style={{ fontFamily: "Montserrat-SemiBold", fontSize: 20, marginBottom: 8 }}>
         Goals
       </Text>
-      <Text style={{ fontSize: 16, marginBottom: 4, marginTop: 32 }}>
-        What is your goal?
+      <Text style={{ fontFamily: "Montserrat-Regular" ,fontSize: 12, color: "grey" }}>
+        This will be used to calculate your calorie total
+      </Text>
+
+      <Text style={{ fontFamily: "Montserrat-SemiBold", fontSize: 16, marginBottom: 4, marginTop: 32 }}>
+        Goal
       </Text>
       {/** Toggle Buttons to handle Goal choice */}
       <ButtonGroup
@@ -32,14 +37,13 @@ const GoalStep = ({
           (goal) => goal.label === weightGoal
         )}
         selectedButtonStyle={{ backgroundColor: "#8868BD" }}
+        textStyle={{fontFamily: "Montserrat-Regular"}}
       />
 
-      <Text style={{ fontSize: 16, marginBottom: 4, marginTop: 32 }}>
-        What is your baseline activity level?
+      <Text style={{ fontFamily: "Montserrat-SemiBold", fontSize: 16, marginBottom: 4, marginTop: 32 }}>
+        Activity Level
       </Text>
-      <Text style={{ fontSize: 12, color: "grey" }}>
-        This will be used to calculate your calorie total
-      </Text>
+      
 
       <ButtonGroup
         buttons={activityLevels.map((level) => level.label)}
@@ -50,6 +54,7 @@ const GoalStep = ({
           (level) => level.value === activityLevel
         )}
         selectedButtonStyle={{ backgroundColor: "#8868BD" }}
+        textStyle={{fontFamily: "Montserrat-Regular"}}
       />
 
       <View
