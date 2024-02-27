@@ -7,24 +7,37 @@ import { auth } from "../firebaseConfig";
 import PropTypes from 'prop-types';
 import { TextInput } from "react-native-paper";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useFonts } from "expo-font";
-import AppLoading from "expo-app-loading";
+import { useFonts, loadAsync } from "expo-font";
+import * as SplashScreen from 'expo-splash-screen'
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  let [fontsLoaded] = useFonts({
-    'Montserrat-Regular': require('../assets/fonts/Montserrat-Regular.ttf')
-  })
-
-  if(!fontsLoaded) {
-    return <AppLoading />
-  }
+  const [fontsLoaded, setFontsLoaded] = useState(false);
 
   useEffect(() => {
-    checkLoginStatus();
+    const preventHide = SplashScreen.preventAutoHideAsync();
+
+    // Load fonts here
+    const loadFonts = async () => {
+      await loadAsync({
+        'Montserrat-Regular': require('../assets/fonts/Montserrat-Regular.ttf'),
+        'Montserrat-SemiBold': require('../assets/fonts/Montserrat-SemiBold.ttf')
+      });
+      setFontsLoaded(true);
+    };
+
+    loadFonts().then(() => {
+      SplashScreen.hideAsync();
+    });
+
+    return () => preventHide;
   }, []);
+
+  if (!fontsLoaded) {
+    return null; // Return nothing while fonts are loading
+  }
 
   const checkLoginStatus = async () => {
     try {

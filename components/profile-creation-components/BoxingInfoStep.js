@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { View, StyleSheet } from "react-native";
 import { Text, Button } from "@rneui/themed";
 import RNPickerSelect from "react-native-picker-select";
-import { useFonts } from "expo-font";
+import { useFonts, loadAsync } from "expo-font";
 import AppLoading from "expo-app-loading";
 import PropTypes from "prop-types";
+import * as SplashScreen from 'expo-splash-screen'
 
 const BoxingInfoStep = ({
   gender,
@@ -169,13 +170,29 @@ const BoxingInfoStep = ({
     return [];
   };
 
-  let [fontsLoaded] = useFonts({
-    'Montserrat-Regular': require('../../assets/fonts/Montserrat-Regular.ttf'),
-    'Montserrat-SemiBold': require('../../assets/fonts/Montserrat-SemiBold.ttf')
-  })
+  const [fontsLoaded, setFontsLoaded] = useState(false);
 
-  if(!fontsLoaded) {
-    return <AppLoading />
+  useEffect(() => {
+    const preventHide = SplashScreen.preventAutoHideAsync();
+
+    // Load fonts here
+    const loadFonts = async () => {
+      await loadAsync({
+        'Montserrat-Regular': require('../../assets/fonts/Montserrat-Regular.ttf'),
+        'Montserrat-SemiBold': require('../../assets/fonts/Montserrat-SemiBold.ttf')
+      });
+      setFontsLoaded(true);
+    };
+
+    loadFonts().then(() => {
+      SplashScreen.hideAsync();
+    });
+
+    return () => preventHide;
+  }, []);
+
+  if (!fontsLoaded) {
+    return null; // Return nothing while fonts are loading
   }
 
   return (
@@ -186,7 +203,7 @@ const BoxingInfoStep = ({
 
       <Text style={{ fontFamily: 'Montserrat-Regular', fontSize: 12, marginBottom: 24 }}>
         Here you will be asked for your sex and boxing level, in order to
-        calculate the correct weight class options.
+        get the correct weight class options.
       </Text>
 
       <Text style={{ fontFamily: 'Montserrat-SemiBold', fontSize: 16, marginBottom: 4 }}>Sex</Text>
@@ -242,6 +259,7 @@ const BoxingInfoStep = ({
           onPress={handleNextStep}
           color="#8868BD"
           disabled={!isStep1NextButtonEnabled}
+          titleStyle={{ fontFamily: 'Montserrat-Regular' }}
         />
       </View>
     </View>
