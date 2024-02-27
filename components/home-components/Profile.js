@@ -28,7 +28,7 @@ const Profile = ({ navigation }) => {
             const userDoc = querySnapshot.docs[0];
             setUser(prevUser => ({
               ...prevUser,
-              userData: userDoc.data()
+              userData: userDoc.data(),
             }));
           }
           setLoading(false);
@@ -51,15 +51,24 @@ const Profile = ({ navigation }) => {
     return () => unsubscribe();
   }, []);
 
-  const handleSignOut = async () => {
-    try {
-      await signOut(auth);
-      await AsyncStorage.removeItem("userToken");
-      navigation.navigate("Login");
-    } catch (error) {
-      console.error("Error during sign out:", error);
-      // Handle error
-    }
+  const handleSignOut = () => {
+    Alert.alert(
+      "Sign Out",
+      "Are you sure you want to sign out?",
+      [
+        { text: "Cancel", onPress: () => {}, style: "cancel" },
+        { text: "Sign Out", onPress: async () => {
+          try {
+            await signOut(auth);
+            await AsyncStorage.removeItem("userToken");
+            navigation.navigate("Login");
+          } catch (error) {
+            console.error("Error during sign out:", error);
+            // Handle error
+          }
+        } },
+      ]
+    );
   };
 
   const renderContent = () => {
