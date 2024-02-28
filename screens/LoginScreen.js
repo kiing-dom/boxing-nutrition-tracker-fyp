@@ -28,6 +28,9 @@ const LoginScreen = ({ navigation }) => {
       setFontsLoaded(true);
     };
 
+    // Check login status once fonts are loaded
+    checkLoginStatus();
+
     loadFonts().then(() => {
       SplashScreen.hideAsync();
     });
@@ -38,7 +41,7 @@ const LoginScreen = ({ navigation }) => {
   if (!fontsLoaded) {
     return null; // Return nothing while fonts are loading
   }
-
+ 
   const checkLoginStatus = async () => {
     try {
       const userToken = await AsyncStorage.getItem('userToken');
