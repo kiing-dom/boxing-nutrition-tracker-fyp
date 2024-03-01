@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { StyleSheet, Text, View, TouchableOpacity, Modal, TouchableWithoutFeedback, ScrollView, Alert } from "react-native";
-import { getDocs, collection, query, where } from "firebase/firestore";
+import { getDocs, collection, query, where, addDoc, Timestamp } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
 import { Card, Divider } from "@rneui/themed";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -114,11 +114,13 @@ const LogMealScreen = () => {
     setModalVisible(true);
   };
 
-  const handleRemoveFood = (mealIndex, foodIndex) => {
-    const updatedMealData = [...mealData];
-    updatedMealData[mealIndex].splice(foodIndex, 1);
+  const handleRemoveFood = (foodIndex) => {
+    // Create a copy of mealData
+    const updatedMealData = mealData.map(meal => meal.filter((food, index) => index !== foodIndex));
+    // Update the state with the modified mealData
     setMealData(updatedMealData);
   };
+  
 
   const handleRemoveMeal = (mealIndex) => {
     Alert.alert(
@@ -132,8 +134,9 @@ const LogMealScreen = () => {
         {
           text: "Delete",
           onPress: () => {
-            const updatedMealData = [...mealData];
-            updatedMealData.splice(mealIndex, 1);
+            // Create a copy of mealData
+            const updatedMealData = mealData.filter((index) => index !== mealIndex);
+            // Update the state with the modified mealData
             setMealData(updatedMealData);
             setMealCount(mealCount - 1);
           },
@@ -143,6 +146,7 @@ const LogMealScreen = () => {
       { cancelable: false }
     );
   };
+  
 
   const handleAddMeal = () => {
     if (mealCount < 8) {
@@ -159,19 +163,33 @@ const LogMealScreen = () => {
     return null; // Return nothing while fonts are loading
   }
 
+  // Calculate total calories consumed
+  let totalCaloriesConsumed = 0;
+  mealData.forEach(meal => {
+    meal.forEach(food => {
+      totalCaloriesConsumed += parseFloat(food.calories);
+    });
+  });
+
+  // Calculate remaining calories
+  const remainingCalories = tdee - totalCaloriesConsumed;
+
   return (
     <ScrollView
       contentContainerStyle={styles.scrollViewContent}
       showsVerticalScrollIndicator={false}
     >
       <View style={styles.container}>
-        <Card containerStyle={styles.card}>
-          <Text style={styles.cardTitle}>Calories Remaining</Text>
-          <Divider style={{ marginBottom: 10 }} />
-          <Text style={{ fontFamily: "Montserrat-Regular", fontSize: 16 }}>
-            {tdee}
-          </Text>
-        </Card>
+      <Card containerStyle={styles.card}>
+  <Text style={styles.cardTitle}>Calories Remaining</Text>
+  <Divider style={{ marginBottom: 10 }} />
+  <Text style={{ fontFamily: "Montserrat-Regular", fontSize: 16 }}>
+    Calories       -         Food       =     Remaining
+  </Text>
+  <Text style={{ fontFamily: "Montserrat-Regular", fontSize: 16 }}>
+    {tdee} - {totalCaloriesConsumed} = {remainingCalories}
+  </Text>
+</Card>
 
         {Array.from({ length: mealCount }).map((_, mealIndex) => (
           <Card key={mealIndex} containerStyle={styles.card}>
@@ -199,7 +217,7 @@ const LogMealScreen = () => {
                     </Text>
                   </View>
                   <TouchableOpacity
-                    onPress={() => handleRemoveFood(mealIndex, foodIndex)}
+                    onPress={() => handleRemoveFood(foodIndex)}
                   >
                     <Text style={styles.removeButton}>x</Text>
                   </TouchableOpacity>
