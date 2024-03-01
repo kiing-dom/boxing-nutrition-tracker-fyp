@@ -5,7 +5,7 @@ import { StatusBar } from "expo-status-bar";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../firebaseConfig";
 import PropTypes from 'prop-types';
-import { TextInput } from "react-native-paper";
+import { TextInput, Modal } from "react-native-paper";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { loadAsync } from "expo-font";
 import * as SplashScreen from 'expo-splash-screen'
@@ -28,9 +28,6 @@ const LoginScreen = ({ navigation }) => {
       setFontsLoaded(true);
     };
 
-    // Check login status once fonts are loaded
-    checkLoginStatus();
-
     loadFonts().then(() => {
       SplashScreen.hideAsync();
     });
@@ -38,21 +35,24 @@ const LoginScreen = ({ navigation }) => {
     return () => preventHide;
   }, []);
 
-  if (!fontsLoaded) {
-    return null; // Return nothing while fonts are loading
-  }
- 
-  const checkLoginStatus = async () => {
-    try {
-      const userToken = await AsyncStorage.getItem('userToken');
-      if (userToken) {
-        // User is already logged in, redirect to HomeScreen
-        navigation.navigate("Home");
+  useEffect(() => {
+    const checkLoginStatus = async () => {
+      try {
+        const userToken = await AsyncStorage.getItem('userToken');
+        if (userToken) {
+          // User is already logged in, redirect to HomeScreen
+          navigation.navigate("Home");
+        }
+      } catch (error) {
+        console.error("Error checking login status:", error);
       }
-    } catch (error) {
-      console.error("Error checking login status:", error);
+    };
+
+    // Call the function conditionally
+    if (fontsLoaded) {
+      checkLoginStatus();
     }
-  };
+  }, [fontsLoaded, navigation]);
 
   const logIn = async () => {
     try {
@@ -119,7 +119,6 @@ const LoginScreen = ({ navigation }) => {
         onPress={() => navigation.navigate("Profile Creation")}
         containerStyle={styles.button}
         title="Register"
-        
       />
       <View style={{ height: 100 }} />
     </KeyboardAvoidingView>

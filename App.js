@@ -5,8 +5,13 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import ProfileCreationScreen from './screens/ProfileCreationScreen';
 import LoginScreen from './screens/LoginScreen';
 import HomeScreen from './screens/HomeScreen';
+import { useState, useEffect } from 'react';
+import * as SplashScreen from 'expo-splash-screen'
+import { loadAsync } from 'expo-font';
 
 const Stack = createNativeStackNavigator();
+
+
 
 const globalScreenOptions = {
   headerStyle: { backgroundColor: "#8868BD" },
@@ -15,6 +20,28 @@ const globalScreenOptions = {
 };
 
 export default function App() {
+
+  const [fontsLoaded, setFontsLoaded] = useState(false);
+
+  useEffect(() => {
+    const preventHide = SplashScreen.preventAutoHideAsync();
+
+    // Load fonts here
+    const loadFonts = async () => {
+      await loadAsync({
+        'Montserrat-Regular': require('./assets/fonts/Montserrat-Regular.ttf'),
+        'Montserrat-SemiBold': require('./assets/fonts/Montserrat-SemiBold.ttf')
+      });
+      setFontsLoaded(true);
+    };
+
+    loadFonts().then(() => {
+      SplashScreen.hideAsync();
+    });
+
+    return () => preventHide;
+  }, []);
+  
   return (
     <NavigationContainer>
         <Stack.Navigator screenOptions={globalScreenOptions}>
