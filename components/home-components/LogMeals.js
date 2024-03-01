@@ -76,37 +76,73 @@ const LogMealScreen = () => {
     fetchUserData();
   }, []);
 
-  const handleAddFood = () => {
+  const handleAddFood = async () => {
     // Check if a meal card is selected
     if (selectedMealIndex !== null) {
       // Extract all nutrition data from foodData
       const { name, calories, protein, carbohydrates, fats } = foodData;
-      // Create a copy of mealData
-      const newMealData = [...mealData];
-      // Add the new food to the selected meal's array
-      newMealData[selectedMealIndex] = [
-        ...(newMealData[selectedMealIndex] || []),
-        { name, calories, protein, carbohydrates, fats },
-      ];
-      // Update the state with the modified mealData
-      setMealData(newMealData);
-      // Reset the foodData state
-      setFoodData({
-        name: "",
-        calories: "",
-        protein: "",
-        carbohydrates: "",
-        fats: "",
-      });
-      // Close the modal
-      setModalVisible(false);
-      // Reset the selected meal index
-      setSelectedMealIndex(null);
+  
+      try {
+        const userToken = await AsyncStorage.getItem("userToken");
+        if (userToken) {
+          const userRef = collection(db, "users");
+          const querySnapshot = await getDocs(
+            query(userRef, where("uid", "==", JSON.parse(userToken).uid))
+          );
+  
+          if (!querySnapshot.empty) {
+            const userDocRef = querySnapshot.docs[0].ref;
+  
+            // Create a subcollection within the user's document for meals
+            const mealCollectionRef = collection(userDocRef, "meals");
+  
+            // Add the new food to the selected meal's array
+            await addDoc(mealCollectionRef, {
+              name,
+              calories,
+              protein,
+              carbohydrates,
+              fats,
+            });
+  
+            // Update the state with the modified mealData
+            const newMealData = [...mealData];
+            newMealData[selectedMealIndex] = [
+              ...(newMealData[selectedMealIndex] || []),
+              { name, calories, protein, carbohydrates, fats },
+            ];
+            setMealData(newMealData);
+  
+            // Reset the foodData state
+            setFoodData({
+              name: "",
+              calories: "",
+              protein: "",
+              carbohydrates: "",
+              fats: "",
+            });
+  
+            // Close the modal
+            setModalVisible(false);
+            // Reset the selected meal index
+            setSelectedMealIndex(null);
+          } else {
+            // Handle case where user data not found
+          }
+        } else {
+          // No user token found, navigate to login
+          navigation.navigate("Login");
+        }
+      } catch (error) {
+        console.error("Error adding food:", error);
+        // Handle error
+      }
     } else {
       // Handle case where no meal card is selected
       Alert.alert("Error", "Please select a meal to add food to.");
     }
   };
+  
 
   // Function to handle clicking on the "Add Food" button of a meal card
   const handleAddFoodButtonClicked = (mealIndex) => {
@@ -116,7 +152,7 @@ const LogMealScreen = () => {
 
   const handleRemoveFood = (foodIndex) => {
     // Create a copy of mealData
-    const updatedMealData = mealData.map(meal => meal.filter((food, index) => index !== foodIndex));
+    const updatedMealData = mealData.map(meal => meal.filter((index) => index !== foodIndex));
     // Update the state with the modified mealData
     setMealData(updatedMealData);
   };
