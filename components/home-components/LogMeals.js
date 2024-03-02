@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, Text, View, TouchableOpacity, Modal, TouchableWithoutFeedback, ScrollView, Alert } from "react-native";
-import { getDocs, collection, query, where, addDoc, Timestamp } from "firebase/firestore";
+import { Text, View, TouchableOpacity, Modal, TouchableWithoutFeedback, ScrollView, Alert } from "react-native";
+import { getDocs, collection, query, where, addDoc, Timestamp, deleteDoc, doc } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
 import { Card, Divider } from "@rneui/themed";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -150,12 +150,54 @@ const LogMealScreen = () => {
     setModalVisible(true);
   };
 
-  const handleRemoveFood = (foodIndex) => {
-    // Create a copy of mealData
-    const updatedMealData = mealData.map(meal => meal.filter((index) => index !== foodIndex));
-    // Update the state with the modified mealData
-    setMealData(updatedMealData);
+  const handleRemoveFood = async (mealIndex, foodIndex) => {
+    try {
+      const userToken = await AsyncStorage.getItem("userToken");
+      if (userToken) {
+        const userRef = collection(db, "users");
+        const querySnapshot = await getDocs(
+          query(userRef, where("uid", "==", JSON.parse(userToken).uid))
+        );
+  
+        if (!querySnapshot.empty) {
+          const userDocRef = querySnapshot.docs[0].ref;
+          
+          // Reference the "meals" subcollection
+          const mealCollectionRef = collection(userDocRef, "meals");
+  
+          // Get the document ID of the food item to delete
+          const mealSnapshot = await getDocs(mealCollectionRef);
+          const mealDocs = mealSnapshot.docs;
+          const foodDocId = mealDocs[mealIndex].id;
+  
+          // Delete the food item document from the "meals" subcollection
+          await deleteDoc(doc(mealCollectionRef, foodDocId));
+  
+          // Retrieve the mealData from state
+          const updatedMealData = [...mealData];
+  
+          // Remove the selected food from mealData
+          updatedMealData[mealIndex] = updatedMealData[mealIndex].filter((_, index) => index !== foodIndex);
+          
+          // Update the state with the modified mealData
+          setMealData(updatedMealData);
+  
+          // Close the modal
+          setModalVisible(false);
+        } else {
+          // Handle case where user data not found
+        }
+      } else {
+        // No user token found, navigate to login
+        navigation.navigate("Login");
+      }
+    } catch (error) {
+      console.error("Error removing food:", error);
+      // Handle error
+    }
   };
+  
+  
   
 
   const handleRemoveMeal = (mealIndex) => {
@@ -220,7 +262,7 @@ const LogMealScreen = () => {
   <Text style={styles.cardTitle}>Calories Remaining</Text>
   <Divider style={{ marginBottom: 10 }} />
   <Text style={{ fontFamily: "Montserrat-Regular", fontSize: 16 }}>
-    Calories       -         Food       =     Remaining
+    Calories - Food = Remaining
   </Text>
   <Text style={{ fontFamily: "Montserrat-Regular", fontSize: 16 }}>
     {tdee} - {totalCaloriesConsumed} = {remainingCalories}
@@ -253,7 +295,7 @@ const LogMealScreen = () => {
                     </Text>
                   </View>
                   <TouchableOpacity
-                    onPress={() => handleRemoveFood(foodIndex)}
+                    onPress={() => handleRemoveFood(mealIndex, foodIndex)}
                   >
                     <Text style={styles.removeButton}>x</Text>
                   </TouchableOpacity>
