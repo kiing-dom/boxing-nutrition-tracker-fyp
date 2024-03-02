@@ -1,4 +1,4 @@
-import { StyleSheet, View, KeyboardAvoidingView, Alert} from "react-native";
+import { StyleSheet, View, KeyboardAvoidingView, Alert, ActivityIndicator} from "react-native";
 import React, { useState, useEffect } from "react";
 import { Button, Input, Icon } from "@rneui/themed";
 import { StatusBar } from "expo-status-bar";
@@ -13,7 +13,6 @@ import * as SplashScreen from 'expo-splash-screen'
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
   const [fontsLoaded, setFontsLoaded] = useState(false);
 
   useEffect(() => {
@@ -26,11 +25,10 @@ const LoginScreen = ({ navigation }) => {
         'Montserrat-SemiBold': require('../assets/fonts/Montserrat-SemiBold.ttf')
       });
       setFontsLoaded(true);
+      SplashScreen.hideAsync();
     };
 
-    loadFonts().then(() => {
-      SplashScreen.hideAsync();
-    });
+    loadFonts();
 
     return () => preventHide;
   }, []);
@@ -40,7 +38,6 @@ const LoginScreen = ({ navigation }) => {
       try {
         const userToken = await AsyncStorage.getItem('userToken');
         if (userToken) {
-          // User is already logged in, redirect to HomeScreen
           navigation.navigate("Home");
         }
       } catch (error) {
@@ -48,7 +45,6 @@ const LoginScreen = ({ navigation }) => {
       }
     };
 
-    // Call the function conditionally
     if (fontsLoaded) {
       checkLoginStatus();
     }
@@ -59,18 +55,10 @@ const LoginScreen = ({ navigation }) => {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      // Successful login
-      console.log("Login successful:", user);
-
-      // Store user data in AsyncStorage
-      await AsyncStorage.setItem('userToken', JSON.stringify(user)); // Store user data
-
-      // Navigate to desired screen or perform other actions
-      navigation.navigate("Home"); // Replace 'HomeScreen' with your intended screen
+      await AsyncStorage.setItem('userToken', JSON.stringify(user));
+      navigation.navigate("Home");
     } catch (error) {
       console.error("Login error:", error);
-
-      // Display an error message to the user
       Alert.alert(
         "Login Failed",
         error.message,
@@ -80,6 +68,16 @@ const LoginScreen = ({ navigation }) => {
     }
   };
 
+  if (!fontsLoaded) {
+    // Render a loading indicator while fonts are loading
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#8868BD" />
+      </View>
+    );
+  }
+
+  // Render the login screen content after fonts are loaded
   return (
     <KeyboardAvoidingView backgroundColor='#FFFFFF' behavior="padding" style={styles.container}>
       <StatusBar style="light" />
@@ -125,11 +123,6 @@ const LoginScreen = ({ navigation }) => {
   );
 };
 
-
-LoginScreen.propTypes = {
-  navigation: PropTypes.object.isRequired, // Assuming navigation is an object and is required
-};
-
 export default LoginScreen;
 
 const styles = StyleSheet.create({
@@ -143,9 +136,14 @@ const styles = StyleSheet.create({
     width: 300,
     marginBottom: 24
   },
-
   button: {
     marginTop: 10,
     borderRadius: 5,
+    width: 200
+  },
+  loadingContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
