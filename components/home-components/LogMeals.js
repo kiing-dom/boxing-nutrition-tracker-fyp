@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Text, View, TouchableOpacity, Modal, TouchableWithoutFeedback, ScrollView, Alert } from "react-native";
+import { Text, View, TouchableOpacity, Modal, TouchableWithoutFeedback, ScrollView, Alert, FlatList, KeyboardAvoidingView } from "react-native";
 import { getDocs, collection, query, where, addDoc, Timestamp, deleteDoc, doc } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
 import { Card, Divider } from "@rneui/themed";
@@ -9,6 +9,7 @@ import { loadAsync } from "expo-font";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { TextInput } from "react-native-paper";
 import { styles } from "../../styles/LogMealStyles"
+import axios from "axios";
 
 const LogMealScreen = () => {
   const [fontsLoaded, setFontsLoaded] = useState(false);
@@ -25,6 +26,8 @@ const LogMealScreen = () => {
   const [loading, setLoading] = useState(true);
   const [tdee, setTdee] = useState(null);
   const [selectedMealIndex, setSelectedMealIndex] = useState(null);
+  const [searchResults, setSearchResults] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     const preventHide = SplashScreen.preventAutoHideAsync();
@@ -75,6 +78,46 @@ const LogMealScreen = () => {
 
     fetchUserData();
   }, []);
+
+  // Function to handle search button click
+const handleSearch = async () => {
+  // Call the searchFood function with the search query
+  await searchFood(searchQuery);
+};
+
+const searchFood = async (query) => {
+  const appId = 'ba6d21c8';
+  const appKey = 'e548123dd00b118c47a0f384885b6039';
+  const url = `https://trackapi.nutritionix.com/v2/search/instant?query=${query}`;
+
+  try {
+    const response = await axios.get(url, {
+      headers: {
+        'x-app-id': appId,
+        'x-app-key': appKey,
+      },
+    });
+    // Log the entire response data for debugging
+        console.log('Response data:', response.data);
+
+    // Process the response data to extract the nutrient details
+    const searchResults = response.data.branded.map((item) => ({
+      name: item.food_name,
+      calories: item.nf_calories,
+      protein: item.nf_protein,
+      carbohydrates: item.nf_total_carbohydrate,
+      fats: item.nf_total_fat,
+    }));
+
+    // Log the extracted search results for debugging
+    console.log('Search results:', searchResults);
+
+    setSearchResults(searchResults);
+  } catch (error) {
+    console.error('Error searching for food:', error);
+    setSearchResults([]); // Return empty array in case of error
+  }
+};
 
   const handleAddFood = async () => {
     // Check if a meal card is selected
@@ -319,67 +362,103 @@ const LogMealScreen = () => {
       </View>
 
       <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
-          <View style={styles.modalContainer}>
-            <TouchableWithoutFeedback>
-              <View style={styles.modalContent}>
-                <TextInput
-                  style={styles.input}
-                  label="Food Name"
-                  value={foodData.name}
-                  onChangeText={(text) =>
-                    setFoodData({ ...foodData, name: text })
-                  }
-                />
-                <TextInput
-                  style={styles.input}
-                  label="Calories"
-                  value={foodData.calories}
-                  onChangeText={(text) =>
-                    setFoodData({ ...foodData, calories: text })
-                  }
-                  keyboardType="numeric"
-                />
-                <TextInput
-                  style={styles.input}
-                  label="Protein (g)"
-                  value={foodData.protein}
-                  onChangeText={(text) =>
-                    setFoodData({ ...foodData, protein: text })
-                  }
-                  keyboardType="numeric"
-                />
-                <TextInput
-                  style={styles.input}
-                  label="Carbohydrates (g)"
-                  value={foodData.carbohydrates}
-                  onChangeText={(text) =>
-                    setFoodData({ ...foodData, carbohydrates: text })
-                  }
-                  keyboardType="numeric"
-                />
-                <TextInput
-                  style={styles.input}
-                  label="Fats (g)"
-                  value={foodData.fats}
-                  onChangeText={(text) =>
-                    setFoodData({ ...foodData, fats: text })
-                  }
-                  keyboardType="numeric"
-                />
-                <TouchableOpacity onPress={handleAddFood}>
-                  <Text style={styles.addButton}>Add Food</Text>
-                </TouchableOpacity>
-              </View>
-            </TouchableWithoutFeedback>
+  animationType="slide"
+  transparent={true}
+  visible={modalVisible}
+  onRequestClose={() => setModalVisible(false)}
+>
+  <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
+    <View style={styles.modalContainer}>
+      <TouchableWithoutFeedback>
+        <View style={styles.modalContent}>
+          {/* Search food input field */}
+          <View style={styles.searchContainer}>
+            <TextInput
+              style={styles.input}
+              label="Search Food"
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
+            <TouchableOpacity onPress={handleSearch}>
+              <Text style={styles.addButton}>Search</Text>
+            </TouchableOpacity>
           </View>
-        </TouchableWithoutFeedback>
-      </Modal>
+
+          <View style={styles.searchResultsContainer}>
+            <FlatList
+              data={searchResults}
+              keyExtractor={(item, index) => index.toString()}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  onPress={() => handleAddFoodFromSearch(item)}
+                >
+                  <Text>{item.name}</Text>
+                  <Text>Calories: {item.calories}</Text>
+                  <Text>Protein: {item.protein}</Text>
+                  <Text>Carbohydrates: {item.carbohydrates}</Text>
+                  <Text>Fats: {item.fats}</Text>
+                </TouchableOpacity>
+              )}
+              style={{ maxHeight: 200 }} // Adjust the height as needed
+            />
+          </View>
+
+          {/* Manual entry input fields */}
+          <TextInput
+            style={styles.input}
+            label="Food Name"
+            value={foodData.name}
+            onChangeText={(text) =>
+              setFoodData({ ...foodData, name: text })
+            }
+          />
+          <TextInput
+            style={styles.input}
+            label="Calories"
+            value={foodData.calories}
+            onChangeText={(text) =>
+              setFoodData({ ...foodData, calories: text })
+            }
+            keyboardType="numeric"
+          />
+          <TextInput
+            style={styles.input}
+            label="Protein (g)"
+            value={foodData.protein}
+            onChangeText={(text) =>
+              setFoodData({ ...foodData, protein: text })
+            }
+            keyboardType="numeric"
+          />
+          <TextInput
+            style={styles.input}
+            label="Carbohydrates (g)"
+            value={foodData.carbohydrates}
+            onChangeText={(text) =>
+              setFoodData({ ...foodData, carbohydrates: text })
+            }
+            keyboardType="numeric"
+          />
+          <TextInput
+            style={styles.input}
+            label="Fats (g)"
+            value={foodData.fats}
+            onChangeText={(text) =>
+              setFoodData({ ...foodData, fats: text })
+            }
+            keyboardType="numeric"
+          />
+
+          {/* Button to add manually entered food */}
+          <TouchableOpacity onPress={handleAddFood}>
+            <Text style={styles.addButton}>Add Manually Entered Food</Text>
+          </TouchableOpacity>
+        </View>
+      </TouchableWithoutFeedback>
+    </View>
+  </TouchableWithoutFeedback>
+</Modal>
+
     </ScrollView>
   );
 };
