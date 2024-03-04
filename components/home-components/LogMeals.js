@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Text, View, TouchableOpacity, Modal, TouchableWithoutFeedback, ScrollView, Alert, FlatList, KeyboardAvoidingView } from "react-native";
 import { getDocs, collection, query, where, addDoc, Timestamp, deleteDoc, doc } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
-import { Card, Divider } from "@rneui/themed";
+import { Card, Divider, Button } from "@rneui/themed";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SplashScreen from "expo-splash-screen";
 import { loadAsync } from "expo-font";
@@ -86,38 +86,37 @@ const handleSearch = async () => {
 };
 
 const searchFood = async (query) => {
-  const appId = 'ba6d21c8';
-  const appKey = 'e548123dd00b118c47a0f384885b6039';
-  const url = `https://trackapi.nutritionix.com/v2/search/instant?query=${query}`;
+  const appId = 'ba6d21c8'; // Replace with your Nutritionix app ID
+  const appKey = 'e548123dd00b118c47a0f384885b6039'; // Replace with your Nutritionix app key
+  const url = `https://trackapi.nutritionix.com/v2/natural/nutrients`;
 
   try {
-    const response = await axios.get(url, {
+    const response = await axios.post(url, {
+      query,
+    }, {
       headers: {
         'x-app-id': appId,
         'x-app-key': appKey,
       },
     });
-    // Log the entire response data for debugging
-        console.log('Response data:', response.data);
 
     // Process the response data to extract the nutrient details
-    const searchResults = response.data.branded.map((item) => ({
-      name: item.food_name,
-      calories: item.nf_calories,
-      protein: item.nf_protein,
-      carbohydrates: item.nf_total_carbohydrate,
-      fats: item.nf_total_fat,
+    const foodData = response.data.foods.map((food) => ({
+      name: food.food_name,
+      calories: food.nf_calories,
+      protein: food.nf_protein,
+      carbohydrates: food.nf_total_carbohydrate,
+      fats: food.nf_total_fat,
+      // Add other nutrient fields as needed
     }));
 
-    // Log the extracted search results for debugging
-    console.log('Search results:', searchResults);
-
-    setSearchResults(searchResults);
+    setSearchResults(foodData);
   } catch (error) {
     console.error('Error searching for food:', error);
     setSearchResults([]); // Return empty array in case of error
   }
 };
+
 
   const handleAddFood = async () => {
     // Check if a meal card is selected
@@ -184,6 +183,17 @@ const searchFood = async (query) => {
       // Handle case where no meal card is selected
       Alert.alert("Error", "Please select a meal to add food to.");
     }
+  };
+
+  const handleAddFoodFromSearch = (food) => {
+    setFoodData({
+      name: food.name,
+      calories: food.calories.toString(),
+      protein: food.protein.toString(),
+      carbohydrates: food.carbohydrates.toString(),
+      fats: food.fats.toString(),
+    });
+    setModalVisible(true);
   };
   
 
@@ -379,9 +389,12 @@ const searchFood = async (query) => {
               value={searchQuery}
               onChangeText={setSearchQuery}
             />
-            <TouchableOpacity onPress={handleSearch}>
-              <Text style={styles.addButton}>Search</Text>
-            </TouchableOpacity>
+            <Button
+              onPress={handleSearch}
+              title="Search"
+              titleStyle={{fontFamily:"Montserrat-Regular",}}
+              buttonStyle={{marginBottom: 24}}
+            />
           </View>
 
           <View style={styles.searchResultsContainer}>
@@ -392,11 +405,11 @@ const searchFood = async (query) => {
                 <TouchableOpacity
                   onPress={() => handleAddFoodFromSearch(item)}
                 >
-                  <Text>{item.name}</Text>
-                  <Text>Calories: {item.calories}</Text>
-                  <Text>Protein: {item.protein}</Text>
-                  <Text>Carbohydrates: {item.carbohydrates}</Text>
-                  <Text>Fats: {item.fats}</Text>
+                  <Text>{item.name.charAt(0).toUpperCase() + item.name.slice(1)}</Text>
+                  <Text>Calories: {item.calories.toString()}</Text>
+                  <Text>Protein: {item.protein.toString()}</Text>
+                  <Text>Carbohydrates: {item.carbohydrates.toString()}</Text>
+                  <Text>Fats: {item.fats.toString()}</Text>
                 </TouchableOpacity>
               )}
               style={{ maxHeight: 200 }} // Adjust the height as needed
@@ -450,9 +463,12 @@ const searchFood = async (query) => {
           />
 
           {/* Button to add manually entered food */}
-          <TouchableOpacity onPress={handleAddFood}>
-            <Text style={styles.addButton}>Add Manually Entered Food</Text>
-          </TouchableOpacity>
+          <Button
+            onPress={handleAddFood}
+            title="Add Food"
+            titleStyle={{fontFamily: "Montserrat-Regular"}}
+
+          />
         </View>
       </TouchableWithoutFeedback>
     </View>
