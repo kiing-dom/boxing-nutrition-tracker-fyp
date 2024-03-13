@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { getDocs, collection, query, where } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
@@ -6,12 +6,14 @@ import { Card, Divider } from "@rneui/themed";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SplashScreen from 'expo-splash-screen'
 import { loadAsync } from "expo-font";
+import RemainingCaloriesContext from "../../contexts/RemainingCaloriesContext";
 
 const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [tdee, setTdee] = useState(null);
-
   const [fontsLoaded, setFontsLoaded] = useState(false);
+
+  const { remainingCalories } = useContext(RemainingCaloriesContext);
 
   useEffect(() => {
     const preventHide = SplashScreen.preventAutoHideAsync();
@@ -69,13 +71,13 @@ const Dashboard = () => {
       return (
         <View style={styles.container}>
           <Text style={styles.heading}>Today</Text>
-          {/* Display TDEE */}
+          {/* Display Calories  */}
           <Card containerStyle={styles.container1}>
             <Text style={styles.cardTitle}>Calories</Text>
             <View style={styles.cardContent}>
               <Text 
               style={{fontFamily:"Montserrat-Regular", fontSize: 32}}>
-              {tdee}
+              {remainingCalories}
               </Text>
               <Text style={{fontFamily:"Montserrat-Regular", fontSize: 20}}>kcal</Text>
             </View>

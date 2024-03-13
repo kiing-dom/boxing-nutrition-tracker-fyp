@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { Text, View, TouchableOpacity, Modal, TouchableWithoutFeedback, ScrollView, Alert, FlatList, KeyboardAvoidingView } from "react-native";
 import { getDocs, collection, query, where, addDoc, Timestamp, deleteDoc, doc } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
@@ -10,6 +10,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { TextInput } from "react-native-paper";
 import { styles } from "../../styles/LogMealStyles"
 import axios from "axios";
+import RemainingCaloriesContext from "../../contexts/RemainingCaloriesContext";
 
 const LogMealScreen = () => {
   const [fontsLoaded, setFontsLoaded] = useState(false);
@@ -28,6 +29,7 @@ const LogMealScreen = () => {
   const [selectedMealIndex, setSelectedMealIndex] = useState(null);
   const [searchResults, setSearchResults] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const { remainingCalories, setRemainingCalories } = useContext(RemainingCaloriesContext); // Access the context
 
   useEffect(() => {
     const preventHide = SplashScreen.preventAutoHideAsync();
@@ -78,6 +80,12 @@ const LogMealScreen = () => {
 
     fetchUserData();
   }, []);
+
+   // Calculate remaining calories
+  // Update the remainingCalories state in the context
+  useEffect(() => {
+    setRemainingCalories(tdee - totalCaloriesConsumed);
+  }, [mealData, tdee]);
 
   // Function to handle search button click
 const handleSearch = async () => {
@@ -302,8 +310,8 @@ const searchFood = async (query) => {
     });
   });
 
-  // Calculate remaining calories
-  const remainingCalories = tdee - totalCaloriesConsumed;
+ 
+
 
   return (
     <ScrollView
