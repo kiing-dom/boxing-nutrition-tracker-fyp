@@ -6,14 +6,23 @@ import Dashboard from "../home-components/Dashboard";
 import Suggestions from "../home-components/Suggestions";
 import Profile from "../home-components/Profile";
 import RemainingCaloriesContext from "../../contexts/RemainingCaloriesContext";
+import RemainingCarbsContext from "../../contexts/RemainingCarbsContext";
+import RemainingProteinContext from "../../contexts/RemainingProteinContext";
+import RemainingFatsContext from "../../contexts/RemainingFatsContext";
 
 const Tab = createMaterialBottomTabNavigator();
 
 const BottomNav = () => {
   const [remainingCalories, setRemainingCalories] = useState(0);
+  const [remainingProtein, setRemainingProtein] = useState(0);
+  const [remainingCarbs, setRemainingCarbs] = useState(0);
+  const [remainingFat, setRemainingFat] = useState(0);
 
   return (
     <RemainingCaloriesContext.Provider value={{ remainingCalories, setRemainingCalories }}>
+    <RemainingCarbsContext.Provider value={{ remainingCarbs, setRemainingCarbs }}>
+    <RemainingProteinContext.Provider value={{ remainingProtein, setRemainingProtein }}>
+    <RemainingFatsContext.Provider value={{ remainingFat, setRemainingFat }}>
       <Tab.Navigator
         initialRouteName="Home"
         activeColor="#f0edf6"
@@ -85,6 +94,9 @@ const BottomNav = () => {
           }}
         />
       </Tab.Navigator>
+      </RemainingFatsContext.Provider>
+      </RemainingProteinContext.Provider>
+      </RemainingCarbsContext.Provider>
     </RemainingCaloriesContext.Provider>
   );
 };

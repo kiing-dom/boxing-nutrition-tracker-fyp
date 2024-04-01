@@ -4,9 +4,12 @@ import { getDocs, collection, query, where } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
 import { Card, Divider } from "@rneui/themed";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as SplashScreen from 'expo-splash-screen'
+import * as SplashScreen from "expo-splash-screen";
 import { loadAsync } from "expo-font";
 import RemainingCaloriesContext from "../../contexts/RemainingCaloriesContext";
+import RemainingCarbsContext from "../../contexts/RemainingCarbsContext";
+import RemainingProteinContext from "../../contexts/RemainingProteinContext";
+import RemainingFatsContext from "../../contexts/RemainingFatsContext";
 import { AnimatedCircularProgress } from "react-native-circular-progress";
 
 const Dashboard = () => {
@@ -15,6 +18,9 @@ const Dashboard = () => {
   const [fontsLoaded, setFontsLoaded] = useState(false);
 
   const { remainingCalories } = useContext(RemainingCaloriesContext);
+  const { remainingCarbs } = useContext(RemainingCarbsContext);
+  const { remainingProtein } = useContext(RemainingProteinContext);
+  const { remainingFat } = useContext(RemainingFatsContext)
 
   useEffect(() => {
     const preventHide = SplashScreen.preventAutoHideAsync();
@@ -22,8 +28,8 @@ const Dashboard = () => {
     // Load fonts here
     const loadFonts = async () => {
       await loadAsync({
-        'Montserrat-Regular': require('../../assets/fonts/Montserrat-Regular.ttf'),
-        'Montserrat-SemiBold': require('../../assets/fonts/Montserrat-SemiBold.ttf')
+        "Montserrat-Regular": require("../../assets/fonts/Montserrat-Regular.ttf"),
+        "Montserrat-SemiBold": require("../../assets/fonts/Montserrat-SemiBold.ttf"),
       });
       setFontsLoaded(true);
     };
@@ -65,7 +71,7 @@ const Dashboard = () => {
 
     fetchUserData();
   }, []);
-  
+
   const renderContent = () => {
     if (loading) {
       return <Text>Loading dashboard data...</Text>;
@@ -79,7 +85,7 @@ const Dashboard = () => {
           {/* Display Calories */}
           <Card containerStyle={styles.container1}>
             <Text style={styles.cardTitle}>Calories</Text>
-            <View style={styles.cardContent}>
+            <View style={[styles.cardContent, {flexDirection: "row" }]}>
               <AnimatedCircularProgress
                 rotation={-90}
                 size={100} // Adjust size as needed
@@ -90,12 +96,23 @@ const Dashboard = () => {
               >
                 {/* Customize center content */}
                 {() => (
-    <View>
-      <Text style={styles.progressText}>{Math.floor(remainingCalories)}</Text>
-      <Text style={{ fontFamily: "Montserrat-Regular", fontSize: 14, textAlign:"center" }}>kcal</Text>
-    </View>
-  )}
+                  <View>
+                    <Text style={styles.progressText}>
+                      {Math.floor(remainingCalories)}
+                    </Text>
+                    <Text
+                      style={{
+                        fontFamily: "Montserrat-Regular",
+                        fontSize: 14,
+                        textAlign: "center",
+                      }}
+                    >
+                      kcal
+                    </Text>
+                  </View>
+                )}
               </AnimatedCircularProgress>
+              
             </View>
           </Card>
           <Divider />
@@ -118,12 +135,12 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontFamily: "Montserrat-SemiBold",
     marginBottom: 20,
-    alignSelf: "baseline"
+    alignSelf: "baseline",
   },
   container1: {
     marginBottom: 20,
     borderRadius: 10,
-    width: "100%"
+    width: "100%",
   },
   cardTitle: {
     fontSize: 24,

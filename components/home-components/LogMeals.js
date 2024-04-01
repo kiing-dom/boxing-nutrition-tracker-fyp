@@ -1,6 +1,23 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Text, View, TouchableOpacity, Modal, TouchableWithoutFeedback, ScrollView, Alert, FlatList, KeyboardAvoidingView } from "react-native";
-import { getDocs, collection, query, where, addDoc, Timestamp, deleteDoc, doc } from "firebase/firestore";
+import {
+  Text,
+  View,
+  TouchableOpacity,
+  Modal,
+  TouchableWithoutFeedback,
+  ScrollView,
+  Alert,
+  FlatList,
+} from "react-native";
+import {
+  getDocs,
+  collection,
+  query,
+  where,
+  addDoc,
+  deleteDoc,
+  doc,
+} from "firebase/firestore";
 import { db } from "../../firebaseConfig";
 import { Card, Divider, Button } from "@rneui/themed";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -8,9 +25,12 @@ import * as SplashScreen from "expo-splash-screen";
 import { loadAsync } from "expo-font";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { TextInput } from "react-native-paper";
-import { styles } from "../../styles/LogMealStyles"
+import { styles } from "../../styles/LogMealStyles";
 import axios from "axios";
 import RemainingCaloriesContext from "../../contexts/RemainingCaloriesContext";
+import RemainingCarbsContext from "../../contexts/RemainingCarbsContext";
+import RemainingProteinContext from "../../contexts/RemainingProteinContext";
+import RemainingFatsContext from "../../contexts/RemainingFatsContext";
 
 const LogMealScreen = () => {
   const [fontsLoaded, setFontsLoaded] = useState(false);
@@ -29,7 +49,18 @@ const LogMealScreen = () => {
   const [selectedMealIndex, setSelectedMealIndex] = useState(null);
   const [searchResults, setSearchResults] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const { remainingCalories, setRemainingCalories } = useContext(RemainingCaloriesContext); // Access the context
+  const { remainingCalories, setRemainingCalories } = useContext(
+    RemainingCaloriesContext
+  );
+  const { remainingProtein, setRemainingProtein } = useContext(
+    RemainingProteinContext
+  );
+  const { remainingCarbs, setRemainingCarbs } = useContext(
+    RemainingCarbsContext
+  );
+  const { remainingFat, setRemainingFat } = useContext(
+    RemainingFatsContext
+  );
 
   useEffect(() => {
     const preventHide = SplashScreen.preventAutoHideAsync();
@@ -81,57 +112,91 @@ const LogMealScreen = () => {
     fetchUserData();
   }, []);
 
-   // Calculate remaining calories
+  // Calculate remaining calories
   // Update the remainingCalories state in the context
   useEffect(() => {
+    // Calculate total protein, carbohydrates, and fats consumed
+    const totalProteinConsumed = mealData.reduce((total, meal) => {
+      return (
+        total +
+        meal.reduce((mealTotal, food) => {
+          return mealTotal + parseFloat(food.protein);
+        }, 0)
+      );
+    }, 0);
+
+    const totalCarbsConsumed = mealData.reduce((total, meal) => {
+      return (
+        total +
+        meal.reduce((mealTotal, food) => {
+          return mealTotal + parseFloat(food.carbohydrates);
+        }, 0)
+      );
+    }, 0);
+
+    const totalFatsConsumed = mealData.reduce((total, meal) => {
+      return (
+        total +
+        meal.reduce((mealTotal, food) => {
+          return mealTotal + parseFloat(food.fats);
+        }, 0)
+      );
+    }, 0);
+
+    setRemainingProtein(Math.floor(tdee * 0.15 / 4));
+    setRemainingCarbs(Math.floor(tdee * 0.6 / 4));
+    setRemainingFat(Math.floor(tdee * 0.25 / 9));
     setRemainingCalories(Math.floor(tdee - totalCaloriesConsumed));
   }, [mealData, tdee]);
 
   // Function to handle search button click
-const handleSearch = async () => {
-  // Call the searchFood function with the search query
-  await searchFood(searchQuery);
-};
+  const handleSearch = async () => {
+    // Call the searchFood function with the search query
+    await searchFood(searchQuery);
+  };
 
-const searchFood = async (query) => {
-  const appId = 'ba6d21c8'; // Replace with your Nutritionix app ID
-  const appKey = 'e548123dd00b118c47a0f384885b6039'; // Replace with your Nutritionix app key
-  const url = `https://trackapi.nutritionix.com/v2/natural/nutrients`;
+  const searchFood = async (query) => {
+    const appId = "ba6d21c8"; // Replace with your Nutritionix app ID
+    const appKey = "e548123dd00b118c47a0f384885b6039"; // Replace with your Nutritionix app key
+    const url = `https://trackapi.nutritionix.com/v2/natural/nutrients`;
 
-  try {
-    const response = await axios.post(url, {
-      query,
-    }, {
-      headers: {
-        'x-app-id': appId,
-        'x-app-key': appKey,
-      },
-    });
+    try {
+      const response = await axios.post(
+        url,
+        {
+          query,
+        },
+        {
+          headers: {
+            "x-app-id": appId,
+            "x-app-key": appKey,
+          },
+        }
+      );
 
-    // Process the response data to extract the nutrient details
-    const foodData = response.data.foods.map((food) => ({
-      name: food.food_name,
-      calories: food.nf_calories,
-      protein: food.nf_protein,
-      carbohydrates: food.nf_total_carbohydrate,
-      fats: food.nf_total_fat,
-      // Add other nutrient fields as needed
-    }));
+      // Process the response data to extract the nutrient details
+      const foodData = response.data.foods.map((food) => ({
+        name: food.food_name,
+        calories: food.nf_calories,
+        protein: food.nf_protein,
+        carbohydrates: food.nf_total_carbohydrate,
+        fats: food.nf_total_fat,
+        // Add other nutrient fields as needed
+      }));
 
-    setSearchResults(foodData);
-  } catch (error) {
-    console.error('Error searching for food:', error);
-    setSearchResults([]); // Return empty array in case of error
-  }
-};
-
+      setSearchResults(foodData);
+    } catch (error) {
+      console.error("Error searching for food:", error);
+      setSearchResults([]); // Return empty array in case of error
+    }
+  };
 
   const handleAddFood = async () => {
     // Check if a meal card is selected
     if (selectedMealIndex !== null) {
       // Extract all nutrition data from foodData
       const { name, calories, protein, carbohydrates, fats } = foodData;
-  
+
       try {
         const userToken = await AsyncStorage.getItem("userToken");
         if (userToken) {
@@ -139,13 +204,13 @@ const searchFood = async (query) => {
           const querySnapshot = await getDocs(
             query(userRef, where("uid", "==", JSON.parse(userToken).uid))
           );
-  
+
           if (!querySnapshot.empty) {
             const userDocRef = querySnapshot.docs[0].ref;
-  
+
             // Create a subcollection within the user's document for meals
             const mealCollectionRef = collection(userDocRef, "meals");
-  
+
             // Add the new food to the selected meal's array
             await addDoc(mealCollectionRef, {
               name,
@@ -154,7 +219,7 @@ const searchFood = async (query) => {
               carbohydrates,
               fats,
             });
-  
+
             // Update the state with the modified mealData
             const newMealData = [...mealData];
             newMealData[selectedMealIndex] = [
@@ -162,7 +227,7 @@ const searchFood = async (query) => {
               { name, calories, protein, carbohydrates, fats },
             ];
             setMealData(newMealData);
-  
+
             // Reset the foodData state
             setFoodData({
               name: "",
@@ -171,7 +236,7 @@ const searchFood = async (query) => {
               carbohydrates: "",
               fats: "",
             });
-  
+
             // Close the modal
             setModalVisible(false);
             // Reset the selected meal index
@@ -203,7 +268,6 @@ const searchFood = async (query) => {
     });
     setModalVisible(true);
   };
-  
 
   // Function to handle clicking on the "Add Food" button of a meal card
   const handleAddFoodButtonClicked = (mealIndex) => {
@@ -219,30 +283,32 @@ const searchFood = async (query) => {
         const querySnapshot = await getDocs(
           query(userRef, where("uid", "==", JSON.parse(userToken).uid))
         );
-  
+
         if (!querySnapshot.empty) {
           const userDocRef = querySnapshot.docs[0].ref;
-          
+
           // Reference the "meals" subcollection
           const mealCollectionRef = collection(userDocRef, "meals");
-  
+
           // Get the document ID of the food item to delete
           const mealSnapshot = await getDocs(mealCollectionRef);
           const mealDocs = mealSnapshot.docs;
           const foodDocId = mealDocs[mealIndex].id;
-  
+
           // Delete the food item document from the "meals" subcollection
           await deleteDoc(doc(mealCollectionRef, foodDocId));
-  
+
           // Retrieve the mealData from state
           const updatedMealData = [...mealData];
-  
+
           // Remove the selected food from mealData
-          updatedMealData[mealIndex] = updatedMealData[mealIndex].filter((_, index) => index !== foodIndex);
-          
+          updatedMealData[mealIndex] = updatedMealData[mealIndex].filter(
+            (_, index) => index !== foodIndex
+          );
+
           // Update the state with the modified mealData
           setMealData(updatedMealData);
-  
+
           // Close the modal
           setModalVisible(false);
         } else {
@@ -257,9 +323,6 @@ const searchFood = async (query) => {
       // Handle error
     }
   };
-  
-  
-  
 
   const handleRemoveMeal = (mealIndex) => {
     Alert.alert(
@@ -274,7 +337,9 @@ const searchFood = async (query) => {
           text: "Delete",
           onPress: () => {
             // Create a copy of mealData
-            const updatedMealData = mealData.filter((index) => index !== mealIndex);
+            const updatedMealData = mealData.filter(
+              (index) => index !== mealIndex
+            );
             // Update the state with the modified mealData
             setMealData(updatedMealData);
             setMealCount(mealCount - 1);
@@ -285,7 +350,6 @@ const searchFood = async (query) => {
       { cancelable: false }
     );
   };
-  
 
   const handleAddMeal = () => {
     if (mealCount < 8) {
@@ -304,14 +368,11 @@ const searchFood = async (query) => {
 
   // Calculate total calories consumed
   let totalCaloriesConsumed = 0;
-  mealData.forEach(meal => {
-    meal.forEach(food => {
+  mealData.forEach((meal) => {
+    meal.forEach((food) => {
       totalCaloriesConsumed += Math.floor(parseFloat(food.calories));
     });
   });
-
- 
-
 
   return (
     <ScrollView
@@ -319,16 +380,16 @@ const searchFood = async (query) => {
       showsVerticalScrollIndicator={false}
     >
       <View style={styles.container}>
-      <Card containerStyle={styles.card}>
-  <Text style={styles.cardTitle}>Calories Remaining</Text>
-  <Divider style={{ marginBottom: 10 }} />
-  <Text style={{ fontFamily: "Montserrat-Regular", fontSize: 16 }}>
-    Calories - Food = Remaining
-  </Text>
-  <Text style={{ fontFamily: "Montserrat-Regular", fontSize: 16 }}>
-    {tdee} - {totalCaloriesConsumed} = {remainingCalories}
-  </Text>
-</Card>
+        <Card containerStyle={styles.card}>
+          <Text style={styles.cardTitle}>Calories Remaining</Text>
+          <Divider style={{ marginBottom: 10 }} />
+          <Text style={{ fontFamily: "Montserrat-Regular", fontSize: 16 }}>
+            Calories - Food = Remaining
+          </Text>
+          <Text style={{ fontFamily: "Montserrat-Regular", fontSize: 16 }}>
+            {tdee} - {totalCaloriesConsumed} = {remainingCalories}
+          </Text>
+        </Card>
 
         {Array.from({ length: mealCount }).map((_, mealIndex) => (
           <Card key={mealIndex} containerStyle={styles.card}>
@@ -364,7 +425,9 @@ const searchFood = async (query) => {
               </TouchableOpacity>
             ))}
 
-            <TouchableOpacity onPress={() => handleAddFoodButtonClicked(mealIndex)}>
+            <TouchableOpacity
+              onPress={() => handleAddFoodButtonClicked(mealIndex)}
+            >
               <Text style={styles.addButton}>Add Food</Text>
             </TouchableOpacity>
           </Card>
@@ -380,109 +443,112 @@ const searchFood = async (query) => {
       </View>
 
       <Modal
-  animationType="slide"
-  transparent={true}
-  visible={modalVisible}
-  onRequestClose={() => setModalVisible(false)}
->
-  <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
-    <View style={styles.modalContainer}>
-      <TouchableWithoutFeedback>
-        <View style={styles.modalContent}>
-          {/* Search food input field */}
-          <View style={styles.searchContainer}>
-            <TextInput
-              style={styles.input}
-              label="Search Food"
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-            />
-            <Button
-              onPress={handleSearch}
-              title="Search"
-              titleStyle={{fontFamily:"Montserrat-Regular",}}
-              buttonStyle={{marginBottom: 24}}
-            />
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
+          <View style={styles.modalContainer}>
+            <TouchableWithoutFeedback>
+              <View style={styles.modalContent}>
+                {/* Search food input field */}
+                <View style={styles.searchContainer}>
+                  <TextInput
+                    style={styles.input}
+                    label="Search Food"
+                    value={searchQuery}
+                    onChangeText={setSearchQuery}
+                  />
+                  <Button
+                    onPress={handleSearch}
+                    title="Search"
+                    titleStyle={{ fontFamily: "Montserrat-Regular" }}
+                    buttonStyle={{ marginBottom: 24 }}
+                  />
+                </View>
+
+                <View style={styles.searchResultsContainer}>
+                  <FlatList
+                    data={searchResults}
+                    keyExtractor={(item, index) => index.toString()}
+                    renderItem={({ item }) => (
+                      <TouchableOpacity
+                        onPress={() => handleAddFoodFromSearch(item)}
+                      >
+                        <Text>
+                          {item.name.charAt(0).toUpperCase() +
+                            item.name.slice(1)}
+                        </Text>
+                        <Text>Calories: {item.calories.toString()}</Text>
+                        <Text>Protein: {item.protein.toString()}</Text>
+                        <Text>
+                          Carbohydrates: {item.carbohydrates.toString()}
+                        </Text>
+                        <Text>Fats: {item.fats.toString()}</Text>
+                      </TouchableOpacity>
+                    )}
+                    style={{ maxHeight: 200 }} // Adjust the height as needed
+                  />
+                </View>
+
+                {/* Manual entry input fields */}
+                <TextInput
+                  style={styles.input}
+                  label="Food Name"
+                  value={foodData.name}
+                  onChangeText={(text) =>
+                    setFoodData({ ...foodData, name: text })
+                  }
+                />
+                <TextInput
+                  style={styles.input}
+                  label="Calories"
+                  value={foodData.calories}
+                  onChangeText={(text) =>
+                    setFoodData({ ...foodData, calories: text })
+                  }
+                  keyboardType="numeric"
+                />
+                <TextInput
+                  style={styles.input}
+                  label="Protein (g)"
+                  value={foodData.protein}
+                  onChangeText={(text) =>
+                    setFoodData({ ...foodData, protein: text })
+                  }
+                  keyboardType="numeric"
+                />
+                <TextInput
+                  style={styles.input}
+                  label="Carbohydrates (g)"
+                  value={foodData.carbohydrates}
+                  onChangeText={(text) =>
+                    setFoodData({ ...foodData, carbohydrates: text })
+                  }
+                  keyboardType="numeric"
+                />
+                <TextInput
+                  style={styles.input}
+                  label="Fats (g)"
+                  value={foodData.fats}
+                  onChangeText={(text) =>
+                    setFoodData({ ...foodData, fats: text })
+                  }
+                  keyboardType="numeric"
+                />
+
+                {/* Button to add manually entered food */}
+                <Button
+                  onPress={handleAddFood}
+                  title="Add Food"
+                  titleStyle={{ fontFamily: "Montserrat-Regular" }}
+                />
+              </View>
+            </TouchableWithoutFeedback>
           </View>
-
-          <View style={styles.searchResultsContainer}>
-            <FlatList
-              data={searchResults}
-              keyExtractor={(item, index) => index.toString()}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  onPress={() => handleAddFoodFromSearch(item)}
-                >
-                  <Text>{item.name.charAt(0).toUpperCase() + item.name.slice(1)}</Text>
-                  <Text>Calories: {item.calories.toString()}</Text>
-                  <Text>Protein: {item.protein.toString()}</Text>
-                  <Text>Carbohydrates: {item.carbohydrates.toString()}</Text>
-                  <Text>Fats: {item.fats.toString()}</Text>
-                </TouchableOpacity>
-              )}
-              style={{ maxHeight: 200 }} // Adjust the height as needed
-            />
-          </View>
-
-          {/* Manual entry input fields */}
-          <TextInput
-            style={styles.input}
-            label="Food Name"
-            value={foodData.name}
-            onChangeText={(text) =>
-              setFoodData({ ...foodData, name: text })
-            }
-          />
-          <TextInput
-            style={styles.input}
-            label="Calories"
-            value={foodData.calories}
-            onChangeText={(text) =>
-              setFoodData({ ...foodData, calories: text })
-            }
-            keyboardType="numeric"
-          />
-          <TextInput
-            style={styles.input}
-            label="Protein (g)"
-            value={foodData.protein}
-            onChangeText={(text) =>
-              setFoodData({ ...foodData, protein: text })
-            }
-            keyboardType="numeric"
-          />
-          <TextInput
-            style={styles.input}
-            label="Carbohydrates (g)"
-            value={foodData.carbohydrates}
-            onChangeText={(text) =>
-              setFoodData({ ...foodData, carbohydrates: text })
-            }
-            keyboardType="numeric"
-          />
-          <TextInput
-            style={styles.input}
-            label="Fats (g)"
-            value={foodData.fats}
-            onChangeText={(text) =>
-              setFoodData({ ...foodData, fats: text })
-            }
-            keyboardType="numeric"
-          />
-
-          {/* Button to add manually entered food */}
-          <Button
-            onPress={handleAddFood}
-            title="Add Food"
-            titleStyle={{fontFamily: "Montserrat-Regular"}}
-
-          />
-        </View>
-      </TouchableWithoutFeedback>
-    </View>
-  </TouchableWithoutFeedback>
-</Modal>
-
+        </TouchableWithoutFeedback>
+      </Modal>
     </ScrollView>
   );
 };
