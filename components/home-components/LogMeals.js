@@ -84,7 +84,7 @@ const LogMealScreen = () => {
    // Calculate remaining calories
   // Update the remainingCalories state in the context
   useEffect(() => {
-    setRemainingCalories(tdee - totalCaloriesConsumed);
+    setRemainingCalories(Math.floor(tdee - totalCaloriesConsumed));
   }, [mealData, tdee]);
 
   // Function to handle search button click
@@ -306,7 +306,7 @@ const searchFood = async (query) => {
   let totalCaloriesConsumed = 0;
   mealData.forEach(meal => {
     meal.forEach(food => {
-      totalCaloriesConsumed += parseFloat(food.calories);
+      totalCaloriesConsumed += Math.floor(parseFloat(food.calories));
     });
   });
 

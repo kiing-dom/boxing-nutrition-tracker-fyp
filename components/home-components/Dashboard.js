@@ -7,6 +7,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SplashScreen from 'expo-splash-screen'
 import { loadAsync } from "expo-font";
 import RemainingCaloriesContext from "../../contexts/RemainingCaloriesContext";
+import { AnimatedCircularProgress } from "react-native-circular-progress";
 
 const Dashboard = () => {
   const [loading, setLoading] = useState(true);
@@ -64,22 +65,37 @@ const Dashboard = () => {
 
     fetchUserData();
   }, []);
+  
   const renderContent = () => {
     if (loading) {
       return <Text>Loading dashboard data...</Text>;
     } else {
+      // Calculate the progress (remaining calories percentage)
+      const remainingPercentage = (1 - remainingCalories / tdee) * 100;
+
       return (
         <View style={styles.container}>
           <Text style={styles.heading}>Today</Text>
-          {/* Display Calories  */}
+          {/* Display Calories */}
           <Card containerStyle={styles.container1}>
             <Text style={styles.cardTitle}>Calories</Text>
             <View style={styles.cardContent}>
-              <Text 
-              style={{fontFamily:"Montserrat-Regular", fontSize: 32}}>
-              {remainingCalories}
-              </Text>
-              <Text style={{fontFamily:"Montserrat-Regular", fontSize: 20}}>kcal</Text>
+              <AnimatedCircularProgress
+                rotation={-90}
+                size={100} // Adjust size as needed
+                width={8} // Adjust line width as needed
+                fill={remainingPercentage} // Set fill based on remaining percentage
+                tintColor="#8868BD" // Customize tint color (optional)
+                backgroundColor="#d3d3d3" // Customize background color (optional)
+              >
+                {/* Customize center content */}
+                {() => (
+    <View>
+      <Text style={styles.progressText}>{Math.floor(remainingCalories)}</Text>
+      <Text style={{ fontFamily: "Montserrat-Regular", fontSize: 14, textAlign:"center" }}>kcal</Text>
+    </View>
+  )}
+              </AnimatedCircularProgress>
             </View>
           </Card>
           <Divider />
@@ -102,7 +118,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontFamily: "Montserrat-SemiBold",
     marginBottom: 20,
-    alignSelf:"baseline"
+    alignSelf: "baseline"
   },
   container1: {
     marginBottom: 20,
@@ -117,6 +133,12 @@ const styles = StyleSheet.create({
   },
   cardContent: {
     marginBottom: 10,
+    alignItems: "left", // Center content horizontally within the card
+  },
+  progressText: {
+    fontSize: 32, // Adjust font size for progress value as needed
+    fontFamily: "Montserrat-SemiBold", // Consider using the same font for consistency
+    textAlign: "center", // Center text within the circular progress component
   },
 });
 

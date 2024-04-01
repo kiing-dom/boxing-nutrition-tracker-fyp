@@ -160,7 +160,7 @@ const BoxingInfoStep = ({
           value: "Super Cruiserweight",
         },
         {
-          label: "Heavyweight - 165 lbs (74.8 kg) or more",
+          label: "Heavyweight - 175 lbs+ (79.4 kg) or more",
           value: "Heavyweight",
         },
       ];

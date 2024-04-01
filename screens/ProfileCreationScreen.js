@@ -241,7 +241,7 @@ const ProfileCreationScreen = ({ navigation }) => {
       .catch(function (error) {
         console.log(error);
       });
-  }, []); //added empty dependency array to useEffect hook so effect is only run once
+  }, []); 
 
   const handleNextStep = () => {
     setStep(step + 1);
@@ -292,7 +292,7 @@ const ProfileCreationScreen = ({ navigation }) => {
         "Success!",
         "Profile created successfully!",
         [
-          { text: "OK", onPress: () => navigation.navigate("Login") }, // Replace 'Login' with your login screen name
+          { text: "OK", onPress: () => navigation.navigate("Login") }, 
         ],
         { cancelable: false } // Disable closing without selecting an option
       );
