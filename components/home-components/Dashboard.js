@@ -11,6 +11,7 @@ import RemainingCarbsContext from "../../contexts/RemainingCarbsContext";
 import RemainingProteinContext from "../../contexts/RemainingProteinContext";
 import RemainingFatsContext from "../../contexts/RemainingFatsContext";
 import { AnimatedCircularProgress } from "react-native-circular-progress";
+import { ProgressBar } from 'react-native-paper'
 
 const Dashboard = () => {
   const [loading, setLoading] = useState(true);
@@ -78,6 +79,9 @@ const Dashboard = () => {
     } else {
       // Calculate the progress (remaining calories percentage)
       const remainingPercentage = (1 - remainingCalories / tdee) * 100;
+      const remainingCarbsPercentage = (1 - remainingCarbs / (tdee * 0.6 / 4));
+      const remainingProteinPercentage = (1 - remainingProtein / (tdee * 0.15 / 4));
+      const remainingFatPercentage = (1 - remainingFat / (tdee * 0.15 / 9));
 
       return (
         <View style={styles.container}>
@@ -112,8 +116,24 @@ const Dashboard = () => {
                   </View>
                 )}
               </AnimatedCircularProgress>
-              
+          <View style={{ marginLeft: 20}}>
+          <Text style={styles.cardSubTitle}>Carbs ({Math.floor(remainingCarbs)}g left){"\n"}
+          <ProgressBar progress={remainingCarbsPercentage} style={{ width: 200 }}/>
+          </Text>
+          
+          <Text style={styles.cardSubTitle}>Protein ({Math.floor(remainingProtein)}g left){"\n"} 
+          <ProgressBar progress={remainingProteinPercentage} style={{ width: 200}} />
+          </Text>
+          
+          <Text style={styles.cardSubTitle}>Fat ({Math.floor(remainingFat)}g left){"\n"} 
+          <ProgressBar progress={remainingFatPercentage} style={{ width: 200}} />
+          </Text>
+
+          </View>
+        
+
             </View>
+            
           </Card>
           <Divider />
         </View>
@@ -148,14 +168,20 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     textAlign: "left",
   },
+  cardSubTitle: {
+    fontSize: 12,
+    fontFamily: "Montserrat-SemiBold",
+    marginBottom: 10,
+    textAlign: "left",
+  },
   cardContent: {
     marginBottom: 10,
-    alignItems: "left", // Center content horizontally within the card
+    alignItems: "left", 
   },
   progressText: {
-    fontSize: 32, // Adjust font size for progress value as needed
-    fontFamily: "Montserrat-SemiBold", // Consider using the same font for consistency
-    textAlign: "center", // Center text within the circular progress component
+    fontSize: 32, 
+    fontFamily: "Montserrat-SemiBold", 
+    textAlign: "center", 
   },
 });
 

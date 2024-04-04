@@ -143,9 +143,9 @@ const LogMealScreen = () => {
       );
     }, 0);
 
-    setRemainingProtein(Math.floor(tdee * 0.15 / 4));
-    setRemainingCarbs(Math.floor(tdee * 0.6 / 4));
-    setRemainingFat(Math.floor(tdee * 0.25 / 9));
+    setRemainingProtein(Math.floor(tdee * 0.15 / 4) - totalProteinConsumed);
+    setRemainingCarbs(Math.floor(tdee * 0.6 / 4) - totalCarbsConsumed);
+    setRemainingFat(Math.floor(tdee * 0.25 / 9) - totalFatsConsumed);
     setRemainingCalories(Math.floor(tdee - totalCaloriesConsumed));
   }, [mealData, tdee]);
 
