@@ -58,9 +58,7 @@ const LogMealScreen = () => {
   const { remainingCarbs, setRemainingCarbs } = useContext(
     RemainingCarbsContext
   );
-  const { remainingFat, setRemainingFat } = useContext(
-    RemainingFatsContext
-  );
+  const { remainingFat, setRemainingFat } = useContext(RemainingFatsContext);
 
   useEffect(() => {
     const preventHide = SplashScreen.preventAutoHideAsync();
@@ -143,9 +141,9 @@ const LogMealScreen = () => {
       );
     }, 0);
 
-    setRemainingProtein(Math.floor(tdee * 0.15 / 4) - totalProteinConsumed);
-    setRemainingCarbs(Math.floor(tdee * 0.6 / 4) - totalCarbsConsumed);
-    setRemainingFat(Math.floor(tdee * 0.25 / 9) - totalFatsConsumed);
+    setRemainingProtein(Math.floor((tdee * 0.15) / 4) - totalProteinConsumed);
+    setRemainingCarbs(Math.floor((tdee * 0.6) / 4) - totalCarbsConsumed);
+    setRemainingFat(Math.floor((tdee * 0.25) / 9) - totalFatsConsumed);
     setRemainingCalories(Math.floor(tdee - totalCaloriesConsumed));
   }, [mealData, tdee]);
 
@@ -468,7 +466,7 @@ const LogMealScreen = () => {
                   />
                 </View>
 
-                <View style={styles.searchResultsContainer}>
+                <View style={{ marginBottom: 12}}>
                   <FlatList
                     data={searchResults}
                     keyExtractor={(item, index) => index.toString()}
@@ -476,16 +474,22 @@ const LogMealScreen = () => {
                       <TouchableOpacity
                         onPress={() => handleAddFoodFromSearch(item)}
                       >
-                        <Text>
+                        <Text style={{ fontFamily: "Montserrat-SemiBold" }}>
                           {item.name.charAt(0).toUpperCase() +
                             item.name.slice(1)}
                         </Text>
-                        <Text>Calories: {item.calories.toString()}</Text>
-                        <Text>Protein: {item.protein.toString()}</Text>
-                        <Text>
+                        <Text style={{ fontFamily: "Montserrat-Regular" }}>
+                          Calories: {item.calories.toString()}
+                        </Text>
+                        <Text style={{ fontFamily: "Montserrat-Regular" }}>
+                          Protein: {item.protein.toString()}
+                        </Text>
+                        <Text style={{ fontFamily: "Montserrat-Regular" }}>
                           Carbohydrates: {item.carbohydrates.toString()}
                         </Text>
-                        <Text>Fats: {item.fats.toString()}</Text>
+                        <Text style={{ fontFamily: "Montserrat-Regular" }}>
+                          Fats: {item.fats.toString()}
+                        </Text>
                       </TouchableOpacity>
                     )}
                     style={{ maxHeight: 200 }} // Adjust the height as needed

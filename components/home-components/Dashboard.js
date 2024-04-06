@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
-import { View, Text, StyleSheet } from "react-native";
-import { getDocs, collection, query, where } from "firebase/firestore";
+import { View, Text, StyleSheet, TextInput, Button } from "react-native";
+import { getDocs, collection, query, where, updateDoc, doc, arrayUnion, arrayRemove } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
 import { Card, Divider } from "@rneui/themed";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -11,11 +11,15 @@ import RemainingCarbsContext from "../../contexts/RemainingCarbsContext";
 import RemainingProteinContext from "../../contexts/RemainingProteinContext";
 import RemainingFatsContext from "../../contexts/RemainingFatsContext";
 import { AnimatedCircularProgress } from "react-native-circular-progress";
-import { ProgressBar } from 'react-native-paper'
+import { ProgressBar } from 'react-native-paper';
+import { LineChart } from "react-native-gifted-charts";
+import { startOfDay, isEqual } from "date-fns";
 
 const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [tdee, setTdee] = useState(null);
+  const [weight, setWeight] = useState(0);
+  const [weightData, setWeightData] = useState([]);
   const [fontsLoaded, setFontsLoaded] = useState(false);
 
   const { remainingCalories } = useContext(RemainingCaloriesContext);
@@ -48,14 +52,24 @@ const Dashboard = () => {
         const userToken = await AsyncStorage.getItem("userToken");
         if (userToken) {
           setLoading(true);
+          const parsedToken = JSON.parse(userToken);
           const userRef = collection(db, "users");
           const querySnapshot = await getDocs(
-            query(userRef, where("uid", "==", JSON.parse(userToken).uid))
+            query(userRef, where("uid", "==", parsedToken.uid))
           );
-
+    
           if (!querySnapshot.empty) {
             const userData = querySnapshot.docs[0].data();
             setTdee(userData.tdee);
+            setWeight(userData.currentWeight); // Set the initial weight from Firebase
+            // Fetch weight data
+            const weightHistory = userData.weightHistory || [];
+            // Remove seconds from timestamp
+            const cleanWeightHistory = weightHistory.map(entry => {
+              const { seconds, ...rest } = entry.timestamp; // Destructure seconds property
+              return { ...rest }; // Return new timestamp object without seconds
+            });
+            setWeightData(cleanWeightHistory);
           } else {
             // Handle case where user data not found
           }
@@ -69,10 +83,75 @@ const Dashboard = () => {
         // Handle error
       }
     };
+    
 
     fetchUserData();
   }, []);
 
+  const handleWeightChange = async (newWeight) => {
+    setWeight(newWeight);
+    const timestamp = new Date(); // Create a timestamp on the client side
+    const today = startOfDay(new Date()); // Get start of today
+  
+    try {
+      const userToken = await AsyncStorage.getItem("userToken");
+      if (userToken) {
+        const userRef = collection(db, "users");
+        const querySnapshot = await getDocs(
+          query(userRef, where("uid", "==", JSON.parse(userToken).uid))
+        );
+  
+        if (!querySnapshot.empty) {
+          const userId = querySnapshot.docs[0].id;
+          const userData = querySnapshot.docs[0].data();
+          console.log("userData:", userData); // Debugging line
+  
+          // Update current weight
+          await updateDoc(doc(db, "users", userId), {
+            currentWeight: parseFloat(newWeight)
+          });
+  
+          // Check if there's an existing entry for today
+          const existingEntryIndex = userData.weightHistory.findIndex(entry => {
+            const entryDate = startOfDay(entry.timestamp.toDate()); // Convert Firestore timestamp to Date object
+            const entryYear = entryDate.getFullYear();
+            const entryMonth = entryDate.getMonth();
+            const entryDay = entryDate.getDate();
+            const todayYear = today.getFullYear();
+            const todayMonth = today.getMonth();
+            const todayDay = today.getDate();
+            return entryYear === todayYear && entryMonth === todayMonth && entryDay === todayDay;
+          });
+  
+          if (existingEntryIndex !== -1) {
+            console.log("Updating existing entry for today.");
+            // Update existing entry with new timestamp and weight
+            userData.weightHistory[existingEntryIndex].weight = parseFloat(newWeight);
+            userData.weightHistory[existingEntryIndex].timestamp = timestamp;
+          } else {
+            console.log("Adding new entry for today.");
+            // Add new entry for today
+            const newWeightHistoryEntry = { weight: parseFloat(newWeight), timestamp };
+            // Push new entry to weightHistory array
+            userData.weightHistory.push(newWeightHistoryEntry);
+          }
+  
+          // Update weightHistory in the database
+          await updateDoc(doc(db, "users", userId), {
+            weightHistory: userData.weightHistory
+          });
+          // Update local weight data
+          setWeightData(userData.weightHistory);
+        }
+      }
+    } catch (error) {
+      console.error("Error updating weight:", error);
+      // Handle error
+    }
+  };
+
+  
+  
   const renderContent = () => {
     if (loading) {
       return <Text>Loading dashboard data...</Text>;
@@ -82,6 +161,14 @@ const Dashboard = () => {
       const remainingCarbsPercentage = (1 - remainingCarbs / (tdee * 0.6 / 4));
       const remainingProteinPercentage = (1 - remainingProtein / (tdee * 0.15 / 4));
       const remainingFatPercentage = (1 - remainingFat / (tdee * 0.15 / 9));
+
+      // Process weightHistory data for line chart
+const lineData = weightData
+.filter(entry => entry.timestamp && entry.weight) // Filter out entries with missing timestamp or weight
+.map(entry => ({
+  value: entry.weight
+}));
+
 
       return (
         <View style={styles.container}>
@@ -116,26 +203,40 @@ const Dashboard = () => {
                   </View>
                 )}
               </AnimatedCircularProgress>
-          <View style={{ marginLeft: 20}}>
-          <Text style={styles.cardSubTitle}>Carbs ({Math.floor(remainingCarbs)}g left){"\n"}
-          <ProgressBar progress={remainingCarbsPercentage} style={{ width: 200 }}/>
-          </Text>
-          
-          <Text style={styles.cardSubTitle}>Protein ({Math.floor(remainingProtein)}g left){"\n"} 
-          <ProgressBar progress={remainingProteinPercentage} style={{ width: 200}} />
-          </Text>
-          
-          <Text style={styles.cardSubTitle}>Fat ({Math.floor(remainingFat)}g left){"\n"} 
-          <ProgressBar progress={remainingFatPercentage} style={{ width: 200}} />
-          </Text>
-
-          </View>
-        
-
+              <View style={{ marginLeft: 20}}>
+                <Text style={styles.cardSubTitle}>Carbs ({Math.floor(remainingCarbs)}g left){"\n"}
+                  <ProgressBar progress={remainingCarbsPercentage} style={{ width: 200 }}/>
+                </Text>
+                <Text style={styles.cardSubTitle}>Protein ({Math.floor(remainingProtein)}g left){"\n"} 
+                  <ProgressBar progress={remainingProteinPercentage} style={{ width: 200}} />
+                </Text>
+                <Text style={styles.cardSubTitle}>Fat ({Math.floor(remainingFat)}g left){"\n"} 
+                  <ProgressBar progress={remainingFatPercentage} style={{ width: 200}} />
+                </Text>
+              </View>
             </View>
-            
           </Card>
           <Divider />
+          {/* Weight Card */}
+          <Card containerStyle={styles.container1}>
+            <Text style={styles.cardTitle}>Weight</Text>
+            <View style={styles.cardContent}>
+              <Text>Current Weight: {weight} kg</Text>
+              <TextInput
+                style={{ height: 40, borderColor: 'gray', borderWidth: 1 }}
+                onChangeText={text => handleWeightChange(text)}
+                value={weight.toString()} // Convert to string for TextInput
+                keyboardType="numeric"
+              />
+              <Button title="Update Weight" onPress={() => {}} />
+            </View>
+            <LineChart
+              data={lineData}
+              showXAxisIndices
+            />
+          </Card>
+          <Divider />
+          
         </View>
       );
     }
