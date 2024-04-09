@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { createMaterialBottomTabNavigator } from "react-native-paper/react-navigation";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import LogMealScreen from "../home-components/LogMeals";
@@ -18,11 +18,16 @@ const BottomNav = () => {
   const [remainingCarbs, setRemainingCarbs] = useState(0);
   const [remainingFat, setRemainingFat] = useState(0);
 
+  const caloriesContextValue = useMemo(() => ({ remainingCalories, setRemainingCalories }), [remainingCalories, setRemainingCalories]);
+  const proteinContextValue = useMemo(() => ({ remainingProtein, setRemainingProtein }), [remainingProtein, setRemainingProtein]);
+  const carbsContextValue = useMemo(() => ({ remainingCarbs, setRemainingCarbs }), [remainingCarbs, setRemainingCarbs]);
+  const fatsContextValue = useMemo(() => ({ remainingFat, setRemainingFat }), [remainingFat, setRemainingFat]);
+
   return (
-    <RemainingCaloriesContext.Provider value={{ remainingCalories, setRemainingCalories }}>
-    <RemainingCarbsContext.Provider value={{ remainingCarbs, setRemainingCarbs }}>
-    <RemainingProteinContext.Provider value={{ remainingProtein, setRemainingProtein }}>
-    <RemainingFatsContext.Provider value={{ remainingFat, setRemainingFat }}>
+    <RemainingCaloriesContext.Provider value={caloriesContextValue}>
+      <RemainingCarbsContext.Provider value={carbsContextValue}>
+        <RemainingProteinContext.Provider value={proteinContextValue}>
+          <RemainingFatsContext.Provider value={fatsContextValue}>
       <Tab.Navigator
         initialRouteName="Home"
         activeColor="#f0edf6"

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
-import { View, Text, StyleSheet, TextInput, Button } from "react-native";
+import { View, Text, StyleSheet, Button, ActivityIndicator } from "react-native";
 import { getDocs, collection, query, where, updateDoc, doc, arrayUnion, arrayRemove } from "firebase/firestore";
+import { TextInput, ProgressBar } from "react-native-paper"
 import { db } from "../../firebaseConfig";
 import { Card, Divider } from "@rneui/themed";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -11,21 +12,23 @@ import RemainingCarbsContext from "../../contexts/RemainingCarbsContext";
 import RemainingProteinContext from "../../contexts/RemainingProteinContext";
 import RemainingFatsContext from "../../contexts/RemainingFatsContext";
 import { AnimatedCircularProgress } from "react-native-circular-progress";
-import { ProgressBar } from 'react-native-paper';
 import { LineChart } from "react-native-gifted-charts";
 import { startOfDay, isEqual } from "date-fns";
 
 const Dashboard = () => {
+  const [mealData, setMealData] = useState([[]]);
   const [loading, setLoading] = useState(true);
   const [tdee, setTdee] = useState(null);
   const [weight, setWeight] = useState(0);
   const [weightData, setWeightData] = useState([]);
   const [fontsLoaded, setFontsLoaded] = useState(false);
+  const [lineData, setLineData] = useState([]);
+  const [totalCaloriesConsumed, setTotalCaloriesConsumed] = useState(0)
 
-  const { remainingCalories } = useContext(RemainingCaloriesContext);
-  const { remainingCarbs } = useContext(RemainingCarbsContext);
-  const { remainingProtein } = useContext(RemainingProteinContext);
-  const { remainingFat } = useContext(RemainingFatsContext)
+  const { remainingCalories, setRemainingCalories } = useContext(RemainingCaloriesContext);
+  const { remainingCarbs, setRemainingCarbs } = useContext(RemainingCarbsContext);
+  const { remainingProtein, setRemainingProtein } = useContext(RemainingProteinContext);
+  const { remainingFat, setRemainingFat } = useContext(RemainingFatsContext)
 
   useEffect(() => {
     const preventHide = SplashScreen.preventAutoHideAsync();
@@ -87,6 +90,63 @@ const Dashboard = () => {
 
     fetchUserData();
   }, []);
+
+  useEffect(() => {
+    // Calculate total protein, carbohydrates, and fats consumed
+    const totalProteinConsumed = mealData.reduce((total, meal) => {
+      return (
+        total +
+        meal.reduce((mealTotal, food) => {
+          return mealTotal + parseFloat(food.protein);
+        }, 0)
+      );
+    }, 0);
+
+    const totalCarbsConsumed = mealData.reduce((total, meal) => {
+      return (
+        total +
+        meal.reduce((mealTotal, food) => {
+          return mealTotal + parseFloat(food.carbohydrates);
+        }, 0)
+      );
+    }, 0);
+
+    const totalFatsConsumed = mealData.reduce((total, meal) => {
+      return (
+        total +
+        meal.reduce((mealTotal, food) => {
+          return mealTotal + parseFloat(food.fats);
+        }, 0)
+      );
+    }, 0);
+
+    setRemainingProtein(Math.floor((tdee * 0.15) / 4) - totalProteinConsumed);
+    setRemainingCarbs(Math.floor((tdee * 0.6) / 4) - totalCarbsConsumed);
+    setRemainingFat(Math.floor((tdee * 0.25) / 9) - totalFatsConsumed);
+    setRemainingCalories(Math.floor(tdee - totalCaloriesConsumed));
+  }, [mealData, tdee]);
+
+  useEffect(() => {
+    // Process weightHistory data for line chart
+    const processedLineData = weightData
+      .filter(entry => entry.timestamp && entry.weight) // Filter out entries with missing timestamp or weight
+      .map(entry => ({
+        value: entry.weight
+      }));
+
+    setLineData(processedLineData);
+  }, [weightData]);
+
+  useEffect(() => {
+    let totalCalories = 0;
+    mealData.forEach((meal) => {
+      meal.forEach((food) => {
+        totalCalories += Math.floor(parseFloat(food.calories));
+      });
+    });
+    setTotalCaloriesConsumed(totalCalories);
+  }, [mealData]);
+
 
   const handleWeightChange = async (newWeight) => {
     setWeight(newWeight);
@@ -151,23 +211,26 @@ const Dashboard = () => {
   };
 
   
+
+  
   
   const renderContent = () => {
     if (loading) {
-      return <Text>Loading dashboard data...</Text>;
+      return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <ActivityIndicator size="large" />
+      </View>
+      );
+      
     } else {
       // Calculate the progress (remaining calories percentage)
       const remainingPercentage = (1 - remainingCalories / tdee) * 100;
       const remainingCarbsPercentage = (1 - remainingCarbs / (tdee * 0.6 / 4));
       const remainingProteinPercentage = (1 - remainingProtein / (tdee * 0.15 / 4));
-      const remainingFatPercentage = (1 - remainingFat / (tdee * 0.15 / 9));
+      const remainingFatPercentage = (1 - remainingFat / (tdee * 0.25 / 9));
 
       // Process weightHistory data for line chart
-const lineData = weightData
-.filter(entry => entry.timestamp && entry.weight) // Filter out entries with missing timestamp or weight
-.map(entry => ({
-  value: entry.weight
-}));
+      
 
 
       return (
@@ -178,7 +241,7 @@ const lineData = weightData
             <Text style={styles.cardTitle}>Calories</Text>
             <View style={[styles.cardContent, {flexDirection: "row" }]}>
               <AnimatedCircularProgress
-                rotation={-90}
+                rotation={0}
                 size={100} // Adjust size as needed
                 width={8} // Adjust line width as needed
                 fill={remainingPercentage} // Set fill based on remaining percentage

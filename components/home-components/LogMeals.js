@@ -43,6 +43,7 @@ const LogMealScreen = () => {
     fats: "",
   });
   const [mealData, setMealData] = useState([[]]);
+  const [totalCaloriesConsumed] = useState(0)
   const [mealCount, setMealCount] = useState(3);
   const [loading, setLoading] = useState(true);
   const [tdee, setTdee] = useState(null);
@@ -113,6 +114,14 @@ const LogMealScreen = () => {
   // Calculate remaining calories
   // Update the remainingCalories state in the context
   useEffect(() => {
+
+    // Calculate total calories consumed
+  let totalCaloriesConsumed = 0;
+  mealData.forEach((meal) => {
+    meal.forEach((food) => {
+      totalCaloriesConsumed += Math.floor(parseFloat(food.calories));
+    });
+  });
     // Calculate total protein, carbohydrates, and fats consumed
     const totalProteinConsumed = mealData.reduce((total, meal) => {
       return (
@@ -364,13 +373,7 @@ const LogMealScreen = () => {
     return null; // Return nothing while fonts are loading
   }
 
-  // Calculate total calories consumed
-  let totalCaloriesConsumed = 0;
-  mealData.forEach((meal) => {
-    meal.forEach((food) => {
-      totalCaloriesConsumed += Math.floor(parseFloat(food.calories));
-    });
-  });
+  
 
   return (
     <ScrollView
