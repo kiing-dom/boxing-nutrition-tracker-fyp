@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 import {
   View,
   Text,
@@ -17,7 +17,7 @@ import {
 } from "firebase/firestore";
 import { TextInput, ProgressBar, Modal } from "react-native-paper";
 import { db } from "../../firebaseConfig";
-import { Card, Divider, Button } from "@rneui/themed";
+import { Card, Divider, Button, ButtonGroup } from "@rneui/themed";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SplashScreen from "expo-splash-screen";
 import { loadAsync } from "expo-font";
@@ -33,6 +33,7 @@ const Dashboard = () => {
   const [mealData, setMealData] = useState([[]]);
   const [loading, setLoading] = useState(true);
   const [tdee, setTdee] = useState(null);
+  const [originalTdee, setOriginalTdee] = useState(null);
   const [weight, setWeight] = useState(0);
   const [weightData, setWeightData] = useState([]);
   const [fontsLoaded, setFontsLoaded] = useState(false);
@@ -40,6 +41,9 @@ const Dashboard = () => {
   const [totalCaloriesConsumed, setTotalCaloriesConsumed] = useState(0);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [newWeight, setNewWeight] = useState("");
+  const [phaseIndex, setPhaseIndex] = useState(1);
+
+  const prevMealDataRef = useRef();
 
   const { remainingCalories, setRemainingCalories } = useContext(
     RemainingCaloriesContext
@@ -86,6 +90,7 @@ const Dashboard = () => {
           if (!querySnapshot.empty) {
             const userData = querySnapshot.docs[0].data();
             setTdee(userData.tdee);
+            setOriginalTdee(userData.tdee);
             setWeight(userData.currentWeight); // Set the initial weight from Firebase
             // Fetch weight data
             const weightHistory = userData.weightHistory || [];
@@ -125,7 +130,7 @@ const Dashboard = () => {
         }, 0)
       );
     }, 0);
-
+  
     const totalCarbsConsumed = mealData.reduce((total, meal) => {
       return (
         total +
@@ -134,7 +139,7 @@ const Dashboard = () => {
         }, 0)
       );
     }, 0);
-
+  
     const totalFatsConsumed = mealData.reduce((total, meal) => {
       return (
         total +
@@ -143,49 +148,79 @@ const Dashboard = () => {
         }, 0)
       );
     }, 0);
-
+  
     setRemainingProtein(Math.floor((tdee * 0.15) / 4) - totalProteinConsumed);
     setRemainingCarbs(Math.floor((tdee * 0.6) / 4) - totalCarbsConsumed);
     setRemainingFat(Math.floor((tdee * 0.25) / 9) - totalFatsConsumed);
     setRemainingCalories(Math.floor(tdee - totalCaloriesConsumed));
+  
+    // Update prevMealDataRef with current mealData
+    prevMealDataRef.current = mealData;
   }, [mealData, tdee]);
+  
 
   useEffect(() => {
     // Process weightHistory data for line chart
     const processedLineData = weightData
-  .filter((entry) => entry.timestamp && entry.weight) // Filter out entries with missing timestamp or weight
-  .map((entry) => {
-    if (entry.timestamp instanceof Date) {
-      return {
-        value: entry.weight,
-        label: `${entry.timestamp.getDate()}/${entry.timestamp.getMonth() + 1}`,
-      };
-    } else if (entry.timestamp.toDate instanceof Function) {
-      // Check if toDate() method is available
-      return {
-        value: entry.weight,
-        label: `${entry.timestamp.toDate().getDate()}/${entry.timestamp.toDate().getMonth() + 1}`,
-      };
-    } else {
-      console.error("Invalid timestamp format:", entry.timestamp);
-      return null; // or handle the case appropriately
-    }
-  })
-  .filter((entry) => entry !== null); // Filter out entries with invalid timestamp format
-
+      .filter((entry) => entry.timestamp && entry.weight) // Filter out entries with missing timestamp or weight
+      .map((entry) => {
+        if (entry.timestamp instanceof Date) {
+          return {
+            value: entry.weight,
+            label: `${entry.timestamp.getDate()}/${
+              entry.timestamp.getMonth() + 1
+            }`,
+          };
+        } else if (entry.timestamp.toDate instanceof Function) {
+          // Check if toDate() method is available
+          return {
+            value: entry.weight,
+            label: `${entry.timestamp.toDate().getDate()}/${
+              entry.timestamp.toDate().getMonth() + 1
+            }`,
+          };
+        } else {
+          console.error("Invalid timestamp format:", entry.timestamp);
+          return null; // or handle the case appropriately
+        }
+      })
+      .filter((entry) => entry !== null); // Filter out entries with invalid timestamp format
 
     setLineData(processedLineData);
   }, [weightData]);
 
   useEffect(() => {
-    let totalCalories = 0;
-    mealData.forEach((meal) => {
-      meal.forEach((food) => {
-        totalCalories += Math.floor(parseFloat(food.calories));
+    // Only update totalCaloriesConsumed if mealData has changed
+    if (mealData !== prevMealDataRef.current) {
+      let totalCalories = 0;
+      mealData.forEach((meal) => {
+        meal.forEach((food) => {
+          totalCalories += Math.floor(parseFloat(food.calories));
+        });
       });
-    });
-    setTotalCaloriesConsumed(totalCalories);
+      setTotalCaloriesConsumed(totalCalories);
+    }
   }, [mealData]);
+
+  const handlePhaseChange = (index) => {
+    switch (index) {
+      case 0:
+        // Rest phase - decrease TDEE by 500 from the original TDEE
+        setTdee((prevTdee) => originalTdee - 500);
+        break;
+      case 1:
+        // Default phase - set TDEE back to the original value
+        setTdee(originalTdee);
+        break;
+      case 2:
+        // Training phase - increase TDEE by 500 from the original TDEE
+        setTdee((prevTdee) => originalTdee + 500);
+        break;
+      default:
+        break;
+    }
+    setPhaseIndex(index);
+  };
 
   const handleWeightChange = async (newWeight) => {
     setWeight(newWeight);
@@ -279,10 +314,21 @@ const Dashboard = () => {
 
       return (
         <View style={styles.container}>
-          <Text style={styles.heading}>Today</Text>
+          <Text style={{ ...styles.heading, marginTop: 12 }}>Today</Text>
+          
           {/* Display Calories */}
           <Card containerStyle={styles.container1}>
-            <Text style={styles.cardTitle}>Calories</Text>
+          <View style={{ flexDirection: "row"}}>
+            <Text style={styles.cardTitle}>
+              Calories 
+            </Text>
+            {/** Display Toggle Buttons for Selecting Phases*/}
+            <ButtonGroup
+                buttons={["Rest", "Default", "Training"]}
+                containerStyle={{ justifyContent: "flex-start", width: "50%", marginTop: -8, marginLeft: 72 }}
+                onPress={handlePhaseChange}
+                selectedIndex={phaseIndex}
+              /></View>
             <View style={[styles.cardContent, { flexDirection: "row" }]}>
               <AnimatedCircularProgress
                 rotation={0}
@@ -315,21 +361,21 @@ const Dashboard = () => {
                   Carbs ({Math.floor(remainingCarbs)}g left){"\n"}
                   <ProgressBar
                     progress={remainingCarbsPercentage}
-                    style={{ width: 200 }}
+                    style={{ width: 200, marginTop: 4 }}
                   />
                 </Text>
                 <Text style={styles.cardSubTitle}>
                   Protein ({Math.floor(remainingProtein)}g left){"\n"}
                   <ProgressBar
                     progress={remainingProteinPercentage}
-                    style={{ width: 200 }}
+                    style={{ width: 200, marginTop: 4 }}
                   />
                 </Text>
                 <Text style={styles.cardSubTitle}>
                   Fat ({Math.floor(remainingFat)}g left){"\n"}
                   <ProgressBar
                     progress={remainingFatPercentage}
-                    style={{ width: 200 }}
+                    style={{ width: 200, marginTop: 4 }}
                   />
                 </Text>
               </View>
