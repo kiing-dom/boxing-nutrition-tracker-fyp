@@ -125,7 +125,7 @@ const CalculateCalorieStep = ({
         <Button
           title="Next"
           onPress={handleNextStep}
-          color="#8868BD"
+          color="#002FF5"
           titleStyle={{ fontFamily: "Montserrat-Regular" }}
         />
         {/* No need for a separate calculate button */}
@@ -157,6 +157,6 @@ const styles = StyleSheet.create({
   },
   resultValue: {
     fontSize: 18,
-    color: "#8868BD",
+    color: "#002FF5",
   },
 });

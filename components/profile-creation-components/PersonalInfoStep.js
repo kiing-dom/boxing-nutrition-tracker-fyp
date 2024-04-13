@@ -133,7 +133,7 @@ const PersonalInfoStep = ({
         <Button
           title="Next"
           onPress={handleNextStep}
-          color="#8868BD"
+          color="#002FF5"
           disabled={!isStep2NextButtonEnabled}
           titleStyle={{ fontFamily: 'Montserrat-Regular' }}
         />

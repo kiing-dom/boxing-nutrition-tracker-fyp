@@ -1,4 +1,4 @@
-import { StyleSheet, View, KeyboardAvoidingView, Alert, ActivityIndicator} from "react-native";
+import { StyleSheet, View, KeyboardAvoidingView, Alert, ActivityIndicator, Text} from "react-native";
 import React, { useState, useEffect } from "react";
 import { Button, Input, Icon } from "@rneui/themed";
 import { StatusBar } from "expo-status-bar";
@@ -72,7 +72,7 @@ const LoginScreen = ({ navigation }) => {
     // Render a loading indicator while fonts are loading
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#8868BD" />
+        <ActivityIndicator size="large" color="#002FF5" />
       </View>
     );
   }
@@ -81,10 +81,10 @@ const LoginScreen = ({ navigation }) => {
   return (
     <KeyboardAvoidingView backgroundColor='#FFFFFF' behavior="padding" style={styles.container}>
       <StatusBar style="light" />
-      <Icon name="lock-closed" type="ionicon" color="#8868BD" size={150} />
+      <Icon name="lock-closed" type="ionicon" color="#002FF5" size={150} />
       <View style={styles.inputContainer}>
         <TextInput
-          label="Email"
+          label={<Text style={{fontFamily: "Montserrat-Regular"}}>Email</Text>}
           mode="outlined" // Use outlined mode for a clear visual style
           autoCapitalize="none"
           autoCorrect={false}
@@ -93,7 +93,7 @@ const LoginScreen = ({ navigation }) => {
           onChangeText={(text) => setEmail(text)}
         />
         <TextInput
-          label="Password"
+          label={<Text style={{fontFamily: "Montserrat-Regular"}}>Password</Text>}
           mode="outlined"
           secureTextEntry
           value={password}
@@ -103,7 +103,7 @@ const LoginScreen = ({ navigation }) => {
       {/* Login Button */}
       <Button
         raised
-        buttonStyle={{ backgroundColor: "#8868BD" }}
+        buttonStyle={{ backgroundColor: "#002FF5" }}
         onPress={logIn}
         containerStyle={styles.button}
         title="Login"
@@ -112,8 +112,8 @@ const LoginScreen = ({ navigation }) => {
       {/* Register Button */}
       <Button
         raised
-        buttonStyle={{ borderColor: "#8868BD", backgroundColor: "transparent" }}
-        titleStyle={{ color: "#8868BD", fontFamily: 'Montserrat-Regular' }}
+        buttonStyle={{ borderColor: "#002FF5", backgroundColor: "transparent" }}
+        titleStyle={{ color: "#002FF5", fontFamily: 'Montserrat-Regular' }}
         onPress={() => navigation.navigate("Profile Creation")}
         containerStyle={styles.button}
         title="Register"

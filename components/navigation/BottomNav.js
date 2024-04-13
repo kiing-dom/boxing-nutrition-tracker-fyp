@@ -32,7 +32,7 @@ const BottomNav = () => {
         initialRouteName="Home"
         activeColor="#f0edf6"
         inactiveColor="#919191"
-        barStyle={{ backgroundColor: "#694fad" }}
+        barStyle={{ backgroundColor: "#002ff5" }}
       >
         <Tab.Screen
           name="Dashboard"

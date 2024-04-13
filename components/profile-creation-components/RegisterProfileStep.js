@@ -93,7 +93,7 @@ const RegisterProfileStep = ({
           raised
           title="Create an Account"
           onPress={register}
-          color="#8868BD"
+          color="#002FF5"
           titleStyle={{ fontFamily:"Montserrat-Regular"}}
         />
       </View>

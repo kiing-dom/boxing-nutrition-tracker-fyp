@@ -311,7 +311,7 @@ const BoxingInfoStep = ({
           title="Next"
           raised
           onPress={handleNextStep}
-          color="#8868BD"
+          color="#002FF5"
           disabled={!isStep1NextButtonEnabled}
           titleStyle={{ fontFamily: "Montserrat-Regular" }}
         />

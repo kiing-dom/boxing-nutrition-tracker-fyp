@@ -54,7 +54,7 @@ const GoalStep = ({
         selectedIndex={weightGoals.findIndex(
           (goal) => goal.label === weightGoal
         )}
-        selectedButtonStyle={{ backgroundColor: "#8868BD" }}
+        selectedButtonStyle={{ backgroundColor: "#002FF5" }}
         textStyle={{ fontFamily: "Montserrat-Regular" }}
       />
 
@@ -77,7 +77,7 @@ const GoalStep = ({
         selectedIndex={activityLevels.findIndex(
           (level) => level.value === activityLevel
         )}
-        selectedButtonStyle={{ backgroundColor: "#8868BD" }}
+        selectedButtonStyle={{ backgroundColor: "#002FF5" }}
         textStyle={{ fontFamily: "Montserrat-Regular" }}
       />
 
@@ -98,7 +98,7 @@ const GoalStep = ({
           raised
           title="Next"
           onPress={handleNextStep}
-          color="#8868BD"
+          color="#002FF5"
           disabled={!isStep3NextButtonEnabled}
           titleStyle={{ fontFamily:"Montserrat-Regular" }}
         />

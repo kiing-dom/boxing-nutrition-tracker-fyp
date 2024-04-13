@@ -438,7 +438,7 @@ const LogMealScreen = () => {
           <MaterialCommunityIcons
             name="plus-circle"
             size={48}
-            color="#8868BD"
+            color="#002FF5"
           />
         </TouchableOpacity>
       </View>

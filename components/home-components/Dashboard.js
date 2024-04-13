@@ -335,7 +335,7 @@ const Dashboard = () => {
                 size={100} // Adjust size as needed
                 width={8} // Adjust line width as needed
                 fill={remainingPercentage} // Set fill based on remaining percentage
-                tintColor="#8868BD" // Customize tint color (optional)
+                tintColor="#002FF5" // Customize tint color (optional)
                 backgroundColor="#d3d3d3" // Customize background color (optional)
               >
                 {/* Customize center content */}
