@@ -149,7 +149,7 @@ const Suggestions = () => {
 
   return (
     <View style={styles.container}>
-      <Card containerStyle={styles.cardContainer}>
+      <Card containerStyle={styles.suggestionsCardContainer}>
         <Text style={styles.heading}>AI Suggestions</Text>
         <Text style={styles.body}>
           Personalized Meal and Training Plans Powered by AI{" "}
@@ -158,7 +158,7 @@ const Suggestions = () => {
 
       {/* FlatList implementation of carousel for meal images */}
 
-      <Card containerStyle={styles.cardContainer}>
+      <Card containerStyle={[styles.cardContainer, {width:"90%"} ]}>
         <View style={styles.flatListContainer}>
           <FlatList
             ref={mealFlatListRef}
@@ -179,14 +179,15 @@ const Suggestions = () => {
 
         <Button
           titleStyle={{ fontFamily: "Montserrat-SemiBold" }}
-          buttonStyle={{ marginBottom: 16 }}
           title="GENERATE MEAL PLAN"
           onPress={generateMealPlan}
+          containerStyle={{}}
+          raised
         />
       </Card>
 
       {/* FlatList implementation of carousel for training images */}
-      <Card containerStyle={styles.cardContainer}>
+      <Card containerStyle={[styles.cardContainer, {width:"90%"} ]}>
         <View style={styles.flatListContainer}>
           <FlatList
             ref={trainingFlatListRef}
@@ -254,6 +255,13 @@ const styles = StyleSheet.create({
     width: "100%",
     alignSelf: "center",
   },
+  suggestionsCardContainer: {
+    height: 96,
+    marginBottom: 0,
+    borderRadius: 10,
+    width: "90%",
+    alignSelf: "center"
+  },
   flatListContainer: {
     height: 200, // Adjust the height as needed
     marginBottom: 20,
@@ -269,7 +277,7 @@ const styles = StyleSheet.create({
     opacity: 0.95,
   },
   flatListContent: {
-    marginLeft: -12
+    marginLeft: -32
   },
   modalView: {
     height: 600,

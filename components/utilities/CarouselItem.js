@@ -8,7 +8,7 @@ const CarouselItem = ({ item }) => {
     <View style={[styles.container, { width }]}>
       <Image
         source={item.image}
-        style={[styles.image, { width: width * 0.9 }]}
+        style={[styles.image, { width: width * 0.75 }]}
       />
     </View>
   );
