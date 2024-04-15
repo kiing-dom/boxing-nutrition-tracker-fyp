@@ -254,13 +254,29 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     width: "100%",
     alignSelf: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   suggestionsCardContainer: {
     height: 96,
     marginBottom: 0,
     borderRadius: 10,
     width: "90%",
-    alignSelf: "center"
+    alignSelf: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   flatListContainer: {
     height: 200, // Adjust the height as needed
@@ -270,7 +286,7 @@ const styles = StyleSheet.create({
       width: 0,
       height: 2,
     },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.5,
     shadowRadius: 4,
     elevation: 5, // Add elevation for Android
     borderRadius: 40, // Adjust the border radius as needed
