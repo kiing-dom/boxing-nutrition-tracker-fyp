@@ -10,7 +10,7 @@ import {
   Dimensions,
   useWindowDimensions,
 } from "react-native";
-import { Button, Card } from "@rneui/themed";
+import { Button, Card, Divider } from "@rneui/themed";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getDocs, collection, query, where } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
@@ -151,6 +151,7 @@ const Suggestions = () => {
     <View style={styles.container}>
       <Card containerStyle={styles.suggestionsCardContainer}>
         <Text style={styles.heading}>AI Suggestions</Text>
+        <Divider />
         <Text style={styles.body}>
           Personalized Meal and Training Plans Powered by AI{" "}
         </Text>

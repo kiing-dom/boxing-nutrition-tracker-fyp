@@ -381,13 +381,13 @@ const LogMealScreen = () => {
       showsVerticalScrollIndicator={false}
     >
       <View style={styles.container}>
-        <Card containerStyle={styles.card}>
+        <Card containerStyle={[styles.card, {marginTop: 24}]}>
           <Text style={styles.cardTitle}>Calories Remaining</Text>
           <Divider style={{ marginBottom: 10 }} />
-          <Text style={{ fontFamily: "Montserrat-Regular", fontSize: 16 }}>
-            Calories - Food = Remaining
+          <Text style={{ fontFamily: "Montserrat-Regular", fontSize: 12 }}>
+            Calories remaining are calculated by subtracting the calories from food from the daily calorie goal.
           </Text>
-          <Text style={{ fontFamily: "Montserrat-Regular", fontSize: 16 }}>
+          <Text style={{ fontFamily: "Montserrat-SemiBold", fontSize: 16, alignSelf: "center"}}>
             {tdee} - {totalCaloriesConsumed} = {remainingCalories}
           </Text>
         </Card>

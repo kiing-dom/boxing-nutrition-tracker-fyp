@@ -8,15 +8,16 @@ import HomeScreen from './screens/HomeScreen';
 import { useState, useEffect } from 'react';
 import * as SplashScreen from 'expo-splash-screen'
 import { loadAsync } from 'expo-font';
+import EditProfileScreen from './screens/EditProfileScreen';
 
 const Stack = createNativeStackNavigator();
 
 
 
 const globalScreenOptions = {
-  headerStyle: { backgroundColor: "#002FF5" },
+  // headerStyle: { backgroundColor: "#002FF5",  },
   headerTitleStyle: { color: "#FFFFFF"},
-  headerTintColor: "white",
+  headerTintColor: "black",
 };
 
 export default function App() {
@@ -46,9 +47,10 @@ export default function App() {
     <NavigationContainer>
         <Stack.Navigator screenOptions={globalScreenOptions}>
           {/* Screens */}
-          <Stack.Screen name='Login' component={LoginScreen} gestureEnabled={false} options={{ headerShown: false, gestureEnabled: false }}/>
+          <Stack.Screen name='Login' component={LoginScreen} gestureEnabled={false} options={{ headerShown: false, gestureEnabled: false, cardOverlayEnable: false }} />
           <Stack.Screen name="Profile Creation" component={ProfileCreationScreen} options={{ title: "Create Your Profile"}} />
           <Stack.Screen name='Home' component={HomeScreen} options={{ headerShown: false, gestureEnabled: false }} />
+          <Stack.Screen name='EditProfile' component={EditProfileScreen} options={{ headerTitle: "", headerTransparent: true }}/>
         </Stack.Navigator>
     </NavigationContainer>
   );

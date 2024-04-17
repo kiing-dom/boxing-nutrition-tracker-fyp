@@ -40,6 +40,8 @@ const ProfileCreationScreen = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  const [weightHistory, setWeightHistory] = useState([]);
+
   // state variables to track selection status
   //step 1:
   const [isGenderSelected, setIsGenderSelected] = useState(false);
@@ -283,6 +285,7 @@ const ProfileCreationScreen = ({ navigation }) => {
         tdee,
         gender,
         password,
+        weightHistory
       });
 
       console.log("Document written with ID: ", docRef.id);
