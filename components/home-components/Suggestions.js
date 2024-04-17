@@ -10,7 +10,7 @@ import {
   Dimensions,
   useWindowDimensions,
 } from "react-native";
-import { Button, Card, Divider } from "@rneui/themed";
+import { Button, Card, Divider, Icon } from "@rneui/themed";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getDocs, collection, query, where } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
@@ -159,7 +159,7 @@ const Suggestions = () => {
 
       {/* FlatList implementation of carousel for meal images */}
 
-      <Card containerStyle={[styles.cardContainer, {width:"90%"} ]}>
+      <Card containerStyle={[styles.cardContainer, { width: "90%" }]}>
         <View style={styles.flatListContainer}>
           <FlatList
             ref={mealFlatListRef}
@@ -180,15 +180,16 @@ const Suggestions = () => {
 
         <Button
           titleStyle={{ fontFamily: "Montserrat-SemiBold" }}
-          title="GENERATE MEAL PLAN"
+          title=" GENERATE MEAL PLAN"
           onPress={generateMealPlan}
           containerStyle={{}}
           raised
+          icon={<Icon name="lunch-dining" size={24} color="#FFFAFA" />}
         />
       </Card>
 
       {/* FlatList implementation of carousel for training images */}
-      <Card containerStyle={[styles.cardContainer, {width:"90%"} ]}>
+      <Card containerStyle={[styles.cardContainer, { width: "90%" }]}>
         <View style={styles.flatListContainer}>
           <FlatList
             ref={trainingFlatListRef}
@@ -211,9 +212,10 @@ const Suggestions = () => {
 
         <Button
           titleStyle={{ fontFamily: "Montserrat-SemiBold" }}
-          title="GENERATE TRAINING PLAN"
+          title=" GENERATE TRAINING PLAN"
           onPress={generateTrainingPlan}
           raised
+          icon={<Icon name="fitness-center" size={24} color="#FFFAFA" />}
         />
       </Card>
 
@@ -294,7 +296,7 @@ const styles = StyleSheet.create({
     opacity: 0.95,
   },
   flatListContent: {
-    marginLeft: -32
+    marginLeft: -32,
   },
   modalView: {
     height: 600,
@@ -323,9 +325,9 @@ const styles = StyleSheet.create({
   },
   body: {
     alignSelf: "baseline",
-    fontSize: 16,
+    fontSize: 12,
     fontFamily: "Montserrat-Regular",
     paddingLeft: 16,
-    marginBottom: 12,
+    marginBottom: 0,
   },
 });

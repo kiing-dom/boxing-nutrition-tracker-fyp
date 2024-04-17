@@ -426,11 +426,14 @@ const LogMealScreen = () => {
               </TouchableOpacity>
             ))}
 
-            <TouchableOpacity
-              onPress={() => handleAddFoodButtonClicked(mealIndex)}
-            >
-              <Text style={styles.addButton}>Add Food</Text>
-            </TouchableOpacity>
+            
+              <Button
+                title="Add Food"
+                titleStyle={{fontFamily: "Monteserrat-Regular"}}
+                onPress={() => handleAddFoodButtonClicked(mealIndex)}
+                containerStyle={{ width: 100, marginTop: 10, alignSelf:"center", borderRadius: 15 }}
+                color="#0022ff"
+               />
           </Card>
         ))}
 

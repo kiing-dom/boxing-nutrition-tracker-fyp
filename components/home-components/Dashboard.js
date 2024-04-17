@@ -328,6 +328,8 @@ const Dashboard = () => {
                 containerStyle={{ justifyContent: "flex-start", width: "50%", marginTop: -8, marginLeft: 72 }}
                 onPress={handlePhaseChange}
                 selectedIndex={phaseIndex}
+                textStyle={{fontFamily: "Montserrat-Regular", fontSize: 12, color: "#000"}}
+                selectedButtonStyle={{ backgroundColor: "#0022ff"}}
               /></View>
             <View style={[styles.cardContent, { flexDirection: "row" }]}>
               <AnimatedCircularProgress
@@ -360,6 +362,7 @@ const Dashboard = () => {
                 <Text style={styles.cardSubTitle}>
                   Carbs ({Math.floor(remainingCarbs)}g left){"\n"}
                   <ProgressBar
+                    color="#0022ff"
                     progress={remainingCarbsPercentage}
                     style={{ width: 200, marginTop: 4 }}
                   />
@@ -367,6 +370,7 @@ const Dashboard = () => {
                 <Text style={styles.cardSubTitle}>
                   Protein ({Math.floor(remainingProtein)}g left){"\n"}
                   <ProgressBar
+                  color="#0022ff"
                     progress={remainingProteinPercentage}
                     style={{ width: 200, marginTop: 4 }}
                   />
@@ -374,6 +378,7 @@ const Dashboard = () => {
                 <Text style={styles.cardSubTitle}>
                   Fat ({Math.floor(remainingFat)}g left){"\n"}
                   <ProgressBar
+                  color="#0022ff"
                     progress={remainingFatPercentage}
                     style={{ width: 200, marginTop: 4 }}
                   />
