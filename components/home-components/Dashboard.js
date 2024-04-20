@@ -17,7 +17,7 @@ import {
 } from "firebase/firestore";
 import { TextInput, ProgressBar, Modal } from "react-native-paper";
 import { db } from "../../firebaseConfig";
-import { Card, Divider, Button, ButtonGroup } from "@rneui/themed";
+import { Card, Divider, Button, ButtonGroup, Icon } from "@rneui/themed";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SplashScreen from "expo-splash-screen";
 import { loadAsync } from "expo-font";
@@ -109,7 +109,6 @@ const Dashboard = () => {
           setLoading(false);
         } else {
           // No user token found, navigate to login
-          navigation.navigate("Login");
         }
       } catch (error) {
         console.error("Error fetching user data:", error);
@@ -130,7 +129,7 @@ const Dashboard = () => {
         }, 0)
       );
     }, 0);
-  
+
     const totalCarbsConsumed = mealData.reduce((total, meal) => {
       return (
         total +
@@ -139,7 +138,7 @@ const Dashboard = () => {
         }, 0)
       );
     }, 0);
-  
+
     const totalFatsConsumed = mealData.reduce((total, meal) => {
       return (
         total +
@@ -148,16 +147,15 @@ const Dashboard = () => {
         }, 0)
       );
     }, 0);
-  
+
     setRemainingProtein(Math.floor((tdee * 0.15) / 4) - totalProteinConsumed);
     setRemainingCarbs(Math.floor((tdee * 0.6) / 4) - totalCarbsConsumed);
     setRemainingFat(Math.floor((tdee * 0.25) / 9) - totalFatsConsumed);
     setRemainingCalories(Math.floor(tdee - totalCaloriesConsumed));
-  
+
     // Update prevMealDataRef with current mealData
     prevMealDataRef.current = mealData;
   }, [mealData, tdee]);
-  
 
   useEffect(() => {
     // Process weightHistory data for line chart
@@ -315,22 +313,30 @@ const Dashboard = () => {
       return (
         <View style={styles.container}>
           <Text style={{ ...styles.heading, marginTop: 12 }}>Today</Text>
-          
+
           {/* Display Calories */}
           <Card containerStyle={styles.container1}>
-          <View style={{ flexDirection: "row"}}>
-            <Text style={styles.cardTitle}>
-              Calories 
-            </Text>
-            {/** Display Toggle Buttons for Selecting Phases*/}
-            <ButtonGroup
+            <View style={{ flexDirection: "row" }}>
+              <Text style={styles.cardTitle}>Calories</Text>
+              {/** Display Toggle Buttons for Selecting Phases*/}
+              <ButtonGroup
                 buttons={["Rest", "Default", "Training"]}
-                containerStyle={{ justifyContent: "flex-start", width: "50%", marginTop: -8, marginLeft: 72 }}
+                containerStyle={{
+                  justifyContent: "flex-start",
+                  width: "50%",
+                  marginTop: -8,
+                  marginLeft: 72,
+                }}
                 onPress={handlePhaseChange}
                 selectedIndex={phaseIndex}
-                textStyle={{fontFamily: "Montserrat-Regular", fontSize: 12, color: "#000"}}
-                selectedButtonStyle={{ backgroundColor: "#0022ff"}}
-              /></View>
+                textStyle={{
+                  fontFamily: "Montserrat-Regular",
+                  fontSize: 12,
+                  color: "#000",
+                }}
+                selectedButtonStyle={{ backgroundColor: "#0022ff" }}
+              />
+            </View>
             <View style={[styles.cardContent, { flexDirection: "row" }]}>
               <AnimatedCircularProgress
                 rotation={0}
@@ -359,30 +365,49 @@ const Dashboard = () => {
                 )}
               </AnimatedCircularProgress>
               <View style={{ marginLeft: 20 }}>
-                <Text style={styles.cardSubTitle}>
-                  Carbs ({Math.floor(remainingCarbs)}g left){"\n"}
-                  <ProgressBar
-                    color="#0022ff"
-                    progress={remainingCarbsPercentage}
-                    style={{ width: 200, marginTop: 4 }}
+                <View style={{ flexDirection: "row", marginLeft: -8 }}>
+                  <Icon
+                    name="bread-slice"
+                    type="material-community"
+                    style={{ marginRight: 4 }}
                   />
-                </Text>
-                <Text style={styles.cardSubTitle}>
-                  Protein ({Math.floor(remainingProtein)}g left){"\n"}
-                  <ProgressBar
-                  color="#0022ff"
-                    progress={remainingProteinPercentage}
-                    style={{ width: 200, marginTop: 4 }}
+                  <Text style={styles.cardSubTitle}>
+                    Carbs ({Math.floor(remainingCarbs)}g left){"\n"}
+                    <ProgressBar
+                      color="#0022ff"
+                      progress={remainingCarbsPercentage}
+                      style={{ width: 200, marginTop: 4 }}
+                    />
+                  </Text>
+                </View>
+
+                <View style={{ flexDirection: "row", marginLeft: -8 }}>
+                  <Icon
+                    name="food-drumstick"
+                    type="material-community"
+                    style={{ marginRight: 4 }}
                   />
-                </Text>
-                <Text style={styles.cardSubTitle}>
-                  Fat ({Math.floor(remainingFat)}g left){"\n"}
-                  <ProgressBar
-                  color="#0022ff"
-                    progress={remainingFatPercentage}
-                    style={{ width: 200, marginTop: 4 }}
-                  />
-                </Text>
+                  <Text style={styles.cardSubTitle}>
+                    Protein ({Math.floor(remainingProtein)}g left){"\n"}
+                    <ProgressBar
+                      color="#0022ff"
+                      progress={remainingProteinPercentage}
+                      style={{ width: 200, marginTop: 4 }}
+                    />
+                  </Text>
+                </View>
+
+                <View style={{ flexDirection: "row", marginLeft: -8 }}>
+                  <Icon name="cupcake" type="material-community" style={{ marginRight: 4 }} />
+                  <Text style={styles.cardSubTitle}>
+                    Fat ({Math.floor(remainingFat)}g left){"\n"}
+                    <ProgressBar
+                      color="#0022ff"
+                      progress={remainingFatPercentage}
+                      style={{ width: 200, marginTop: 4 }}
+                    />
+                  </Text>
+                </View>
               </View>
             </View>
           </Card>
@@ -395,7 +420,9 @@ const Dashboard = () => {
             <Card containerStyle={styles.container1}>
               <Text style={styles.cardTitle}>Weight</Text>
               <View style={styles.cardContent}>
-                <Text>Current Weight: {weight} kg</Text>
+                <Text style={{ fontFamily: "Montserrat-Regular" }}>
+                  Current Weight: {weight} kg
+                </Text>
               </View>
               <LineChart
                 data={lineData}
@@ -405,6 +432,7 @@ const Dashboard = () => {
                 showValuesAsDataPointsText
                 xAxisLength={300}
                 rulesLength={300}
+                hideYAxisText
               />
             </Card>
           </TouchableOpacity>

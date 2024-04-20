@@ -12,6 +12,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { db } from "../firebaseConfig";
 import { Icon, Button, ButtonGroup } from "@rneui/themed";
 import { List, TextInput, Modal, Divider } from "react-native-paper";
+import RNPickerSelect from "react-native-picker-select";
 
 const EditProfileScreen = () => {
   const [user, setUser] = useState(null);
@@ -31,7 +32,7 @@ const EditProfileScreen = () => {
   const [newBmr, setNewBmr] = useState(0);
 
   const [tdee, setTdee] = useState(0);
-  const [newTdee, setNewTdee] = useState(0)
+  const [newTdee, setNewTdee] = useState(0);
 
   const [currentWeight, setCurrentWeight] = useState(null);
 
@@ -39,9 +40,14 @@ const EditProfileScreen = () => {
   const [newWeightGoal, setNewWeightGoal] = useState("");
   const [isWeightGoalSelected, setIsWeightGoalSelected] = useState(false);
 
-
   const [weightClass, setWeightClass] = useState("");
+  const [newWeightClass, setNewWeightClass] = useState("");
+  const [isWeightClassSelected, setIsWeightClassSelected] = useState(false);
+
+
   const [gender, setGender] = useState("");
+
+  const [boxingLevel, setBoxingLevel] = useState("");
   const [nameModalVisible, setNameModalVisible] = useState(false);
   const [emailModalVisible, setEmailModalVisible] = useState(false);
   const [activityLevelModalVisible, setActivityLevelModalVisible] =
@@ -51,10 +57,6 @@ const EditProfileScreen = () => {
   const [newFirstName, setNewFirstName] = useState("");
   const [newLastName, setNewLastName] = useState("");
   const [newEmail, setNewEmail] = useState("");
-  
-  const [newWeightClass, setNewWeightClass] = useState("");
-
-  
 
   const handleActivityLevelSelection = (value) => {
     setNewActivityLevel(activityLevels[value].value);
@@ -64,6 +66,164 @@ const EditProfileScreen = () => {
   const handleWeightGoalSelection = (value) => {
     setNewWeightGoal(weightGoals[value].label);
     setIsWeightGoalSelected(value !== null);
+  };
+
+  const handleWeightClassSelection = (value) => {
+    setNewWeightClass(value);
+    setIsWeightClassSelected(value !== null);
+  };
+
+  const getWeightClasses = () => {
+    if (boxingLevel === "Amateur" && gender === "Male") {
+      return [
+        { label: "Minimumweight - 105.8 lbs (48 kg)", value: "Minimumweight" },
+        { label: "Flyweight - 112.4 lbs (51 kg)", value: "Flyweight" },
+        { label: "Bantamweight - 119 lbs (54 kg)", value: "Bantamweight" },
+        { label: "Featherweight - 126 lbs (57 kg)", value: "Featherweight" },
+        { label: "Lightweight - 132.3 lbs (60 kg)", value: "Lightweight" },
+        {
+          label: "Light Welterweight - 140 lbs (63.5 kg)",
+          value: "Light Welterweight",
+        },
+        { label: "Welterweight - 147 lbs (67 kg)", value: "Welterweight" },
+        {
+          label: "Light Middleweight - 156.5 lbs (71 kg)",
+          value: "Light Middleweight",
+        },
+        { label: "Middleweight - 165.3 lbs (75 kg)", value: "Middleweight" },
+        {
+          label: "Light Heavyweight - 176.4 lbs (80 kg)",
+          value: "Light Heavyweight",
+        },
+        { label: "Cruiserweight - 189.6 lbs (86 kg)", value: "Cruiserweight" },
+        { label: "Heavyweight - 200.6 lbs (92 kg)", value: "Heavyweight" },
+        {
+          label: "Super Heavyweight - 200.6 lbs+ (92 kg+)",
+          value: "Super Heavyweight",
+        },
+      ];
+    } else if (boxingLevel === "Amateur" && gender === "Female") {
+      return [
+        { label: "Mininumweight - 105.8 lbs (48 kg)", value: "Minimumweight" },
+        {
+          label: "Light Flyweight - 110.2 lbs (50 kg)",
+          value: "Light Flyweight",
+        },
+        { label: "Flyweight - 114.6 lbs (52 kg)", value: "Flyweight" },
+        { label: "Bantamweight - 119 lbs (54 kg)", value: "Bantamweight" },
+        { label: "Featherweight - 125.7 lbs (57 kg)", value: "Featherweight" },
+        { label: "Lightweight - 132.3 lbs (60 kg", value: "Lightweight" },
+        {
+          label: "Light Welterweight - 138.9 lbs (63 kg)",
+          value: "Light Welterweight",
+        },
+        { label: "Welterweight - 145.5 lbs (66 kg)", value: "Welterweight" },
+        {
+          label: "Light Middleweight - 154.3 lbs (70 kg)",
+          value: "Light Middleweight",
+        },
+        { label: "Middleweight - 165.3 lbs (75 kg)", value: "Middleweight" },
+        {
+          label: "Light Heavyweight - 178.6 lbs (81 kg)",
+          value: "Light Heavyweight",
+        },
+        { label: "Heavyweight - 178.6 lbs+ (81 kg+)", value: "Heavyweight" },
+      ];
+    } else if (boxingLevel === "Professional" && gender === "Male") {
+      return [
+        { label: "Minimumweight - 105 lbs (47.6 kg)", value: "Minimumweight" },
+        {
+          label: "Light Flyweight - 108 lbs (49 kg)",
+          value: "Light Flyweight",
+        },
+        { label: "Flyweight - 112 lbs (50.8 kg)", value: "Flyweight" },
+        {
+          label: "Super Flyweight - 115 lbs (52.1 kg)",
+          value: "Super Flyweight",
+        },
+        { label: "Bantamweight - 118 lbs (53.5 kg)", value: "Bantamweight" },
+        {
+          label: "Super Bantamweight - 122 lbs (55.3 kg)",
+          value: "Super Bantamweight",
+        },
+        { label: "Featherweight - 126 lbs (57.1 kg)", value: "Featherweight" },
+        {
+          label: "Super Featherweight - 130 lbs (59 kg)",
+          value: "Super Featherweight",
+        },
+        { label: "Lightweight - 135 lbs (61.2 kg)", value: "Lightweight" },
+        {
+          label: "Super Lightweight - 140 lbs (63.5 kg)",
+          value: "Super Lightweight",
+        },
+        { label: "Welterweight - 147 lbs (66.7 kg)", value: "Welterweight" },
+        {
+          label: "Super Welterweight - 154 lbs (69.9 kg)",
+          value: "Super Welterweight",
+        },
+        { label: "Middleweight - 160 lbs (72.5 kg)", value: "Middleweight" },
+        {
+          label: "Super Middleweight - 168 lbs (76.2 kg)",
+          value: "Super Middleweight",
+        },
+        {
+          label: "Light Heavyweight - 175 lbs (79.4 kg)",
+          value: "Light Heavyweight",
+        },
+        { label: "Cruiserweight - 200 lbs (90.7 kg)", value: "Cruiserweight" },
+        { label: "Heavyweight - Unlimited", value: "Heavyweight" },
+      ];
+    } else if (boxingLevel === "Professional" && gender === "Female") {
+      return [
+        { label: "Atomweight - 95 lbs (43 kg) or less", value: "Atomweight" },
+        { label: "Strawweight - 105 lbs (47.6 kg)", value: "Strawweight" },
+        { label: "Mini-Flyweight - 108 lbs (49 kg)", value: "Mini-Flyweight" },
+        { label: "Flyweight - 112 lbs (50.8 kg)", value: "Flyweight" },
+        {
+          label: "Super Flyweight - 115 lbs (52.1 kg)",
+          value: "Super Flyweight",
+        },
+        { label: "Bantamweight - 118 lbs (53.5 kg)", value: "Bantamweight" },
+        {
+          label: "Super Bantamweight - 122 lbs (55.3 kg)",
+          value: "Super Bantamweight",
+        },
+        { label: "Featherweight - 126 lbs (57.1 kg)", value: "Featherweight" },
+        {
+          label: "Super Featherweight - 130 lbs (59 kg)",
+          value: "Super Featherweight",
+        },
+        { label: "Lightweight - 135 lbs (61.2 kg)", value: "Lightweight" },
+        {
+          label: "Light Welterweight - 140 lbs (63.5 kg)",
+          value: "Light Welterweight",
+        },
+        { label: "Welterweight - 147 lbs (66.7 kg)", value: "Welterweight" },
+        {
+          label: "Light Middleweight - 152 lbs (69.0 kg)",
+          value: "Light Middleweight",
+        },
+        { label: "Middleweight - 154 lbs (69.9 kg)", value: "Middleweight" },
+        {
+          label: "Super Middleweight - 160 lbs (72.5 kg)",
+          value: "Super Middleweight",
+        },
+        {
+          label: "Light Heavyweight - 168 lbs (76.2 kg)",
+          value: "Light Heavyweight",
+        },
+        {
+          label: "Super Cruiserweight - 175 lbs (79.4 kg)",
+          value: "Super Cruiserweight",
+        },
+        {
+          label: "Heavyweight - 175 lbs+ (79.4 kg) or more",
+          value: "Heavyweight",
+        },
+      ];
+    }
+    // default case
+    return [];
   };
 
   const activityLevels = [
@@ -112,9 +272,10 @@ const EditProfileScreen = () => {
             setWeightGoal(userData.weightGoal);
             setWeightClass(userData.weightClass);
             setGender(userData.gender);
+            setBoxingLevel(userData.boxingLevel);
 
             setNewActivityLevel(userData.activityLevel);
-            setNewWeightGoal(userData.weightGoal)
+            setNewWeightGoal(userData.weightGoal);
           } else {
             Alert.alert("User data not found");
           }
@@ -152,7 +313,7 @@ const EditProfileScreen = () => {
    */
   const calculateTDEE = () => {
     const activityMultipliers = {
-      "Sedentary": 1.2,
+      Sedentary: 1.2,
       "Lightly Active": 1.375,
       "Moderately Active": 1.55,
       "Very Active": 1.725,
@@ -229,7 +390,6 @@ const EditProfileScreen = () => {
   };
 
   const saveWeightGoal = async () => {
-
     const userToken = await AsyncStorage.getItem("userToken");
     const userRef = collection(db, "users");
     const querySnapshot = await getDocs(
@@ -241,10 +401,10 @@ const EditProfileScreen = () => {
     calculateTDEE();
 
     try {
-      await updateDoc(doc(db, "users", userId), { 
+      await updateDoc(doc(db, "users", userId), {
         weightGoal: newWeightGoal,
         bmr: newBmr,
-        tdee: newTdee 
+        tdee: newTdee,
       });
       setWeightGoal(newWeightGoal);
       setWeightGoalModalVisible(false);
@@ -254,8 +414,15 @@ const EditProfileScreen = () => {
   };
 
   const saveWeightClass = async () => {
+    const userToken = await AsyncStorage.getItem("userToken");
+    const userRef = collection(db, "users");
+    const querySnapshot = await getDocs(
+      query(userRef, where("uid", "==", JSON.parse(userToken).uid))
+    );
+    const userId = querySnapshot.docs[0].id;
+
     try {
-      await updateDoc(doc(db, "users", user.id), {
+      await updateDoc(doc(db, "users", userId), {
         weightClass: newWeightClass,
       });
       setWeightClass(newWeightClass);
@@ -276,8 +443,6 @@ const EditProfileScreen = () => {
         />
         <Text style={[styles.header, { marginBottom: 32 }]}>Edit Profile</Text>
       </View>
-
-      
 
       <View stlye={styles.editInformationContainer}>
         <List.Section>
@@ -325,7 +490,9 @@ const EditProfileScreen = () => {
 
       {/* Modals for editing information */}
       <Modal
-        onDismiss={() => {setNameModalVisible(false)}}
+        onDismiss={() => {
+          setNameModalVisible(false);
+        }}
         animationType="slide"
         transparent={true}
         visible={nameModalVisible}
@@ -333,8 +500,16 @@ const EditProfileScreen = () => {
       >
         {/* Name Modal Content */}
         <View style={styles.modalContainer}>
-          <View style={[styles.modalContent, { width: "80%", height: 300}]}>
-            <Text style={{ fontFamily: "Montserrat-Regular", fontSize: 24, marginBottom: 12}}>Edit Name</Text>
+          <View style={[styles.modalContent, { width: "80%", height: 300 }]}>
+            <Text
+              style={{
+                fontFamily: "Montserrat-Regular",
+                fontSize: 24,
+                marginBottom: 12,
+              }}
+            >
+              Edit Name
+            </Text>
             <TextInput
               value={newFirstName}
               onChangeText={setNewFirstName}
@@ -353,7 +528,9 @@ const EditProfileScreen = () => {
       </Modal>
 
       <Modal
-        onDismiss={() => {setEmailModalVisible(false)}}
+        onDismiss={() => {
+          setEmailModalVisible(false);
+        }}
         animationType="slide"
         transparent={true}
         visible={emailModalVisible}
@@ -361,8 +538,8 @@ const EditProfileScreen = () => {
       >
         {/* Email Modal Content */}
         <View style={styles.modalContainer}>
-        <View style={[styles.modalContent, { width: "80%", height: 300}]}>
-          <Text style={styles.header2}> Edit Email</Text>
+          <View style={[styles.modalContent, { width: "80%", height: 300 }]}>
+            <Text style={styles.header2}> Edit Email</Text>
             <TextInput
               value={newEmail}
               onChangeText={setNewEmail}
@@ -378,7 +555,9 @@ const EditProfileScreen = () => {
       </Modal>
 
       <Modal
-        onDismiss={() => {setActivityLevelModalVisible(false)}}
+        onDismiss={() => {
+          setActivityLevelModalVisible(false);
+        }}
         animationType="slide"
         transparent={true}
         visible={activityLevelModalVisible}
@@ -386,20 +565,26 @@ const EditProfileScreen = () => {
       >
         {/* Activity Level Modal Content */}
         <View style={styles.modalContainer}>
-        <View style={[styles.modalContent, { width: "80%", height: 375 }]}>
+          <View style={[styles.modalContent, { width: "80%", height: 400 }]}>
             <Text style={styles.header2}>Edit Activity Level</Text>
             <ButtonGroup
-        buttons={activityLevels.map((level) => level.label)}
-        onPress={handleActivityLevelSelection}
-        value={activityLevel}
-        vertical
-        selectedIndex={activityLevels.findIndex(
-          (level) => level.value === newActivityLevel
-        )}
-        selectedButtonStyle={{ backgroundColor: "#002FF5" }}
-        textStyle={{ fontFamily: "Montserrat-Regular" }}
-      />
-            <Button title="Save" onPress={saveActivityLevel} />
+              buttons={activityLevels.map((level) => level.label)}
+              onPress={handleActivityLevelSelection}
+              value={activityLevel}
+              vertical
+              selectedIndex={activityLevels.findIndex(
+                (level) => level.value === newActivityLevel
+              )}
+              selectedButtonStyle={{ backgroundColor: "#002FF5" }}
+              textStyle={{ fontFamily: "Montserrat-Regular" }}
+              containerStyle={{ marginBottom: 12 }}
+            />
+            <Button
+              raised
+              title="Save"
+              onPress={saveActivityLevel}
+              containerStyle={{ marginBottom: 12 }}
+            />
             <Button
               title="Cancel"
               onPress={() => setActivityLevelModalVisible(false)}
@@ -408,9 +593,11 @@ const EditProfileScreen = () => {
         </View>
       </Modal>
 
-        {/** Weight Goal Modal */}
+      {/** Weight Goal Modal */}
       <Modal
-        onDismiss={() => {setWeightGoalModalVisible(false)}}
+        onDismiss={() => {
+          setWeightGoalModalVisible(false);
+        }}
         animationType="slide"
         transparent={true}
         visible={weightGoalModalVisible}
@@ -418,20 +605,27 @@ const EditProfileScreen = () => {
       >
         {/* Weight Goal Modal Content */}
         <View style={styles.modalContainer}>
-        <View style={[styles.modalContent, { width: "80%", height: 375 }]}>
+          <View style={[styles.modalContent, { width: "80%", height: 375 }]}>
+            <Text style={styles.header2}>Edit Weight Goals</Text>
             {/** Toggle Buttons to handle Goal choice */}
-      <ButtonGroup
-        buttons={weightGoals.map((goals) => goals.label)}
-        onPress={handleWeightGoalSelection}
-        value={weightGoal}
-        vertical
-        selectedIndex={weightGoals.findIndex(
-          (goal) => goal.label === newWeightGoal
-        )}
-        selectedButtonStyle={{ backgroundColor: "#002FF5" }}
-        textStyle={{ fontFamily: "Montserrat-Regular" }}
-      />
-            <Button title="Save" onPress={saveWeightGoal} />
+            <ButtonGroup
+              containerStyle={{ marginTop: 32, marginBottom: 24 }}
+              buttons={weightGoals.map((goals) => goals.label)}
+              onPress={handleWeightGoalSelection}
+              value={weightGoal}
+              vertical
+              selectedIndex={weightGoals.findIndex(
+                (goal) => goal.label === newWeightGoal
+              )}
+              selectedButtonStyle={{ backgroundColor: "#002FF5" }}
+              textStyle={{ fontFamily: "Montserrat-Regular" }}
+            />
+            <Button
+              title="Save"
+              onPress={saveWeightGoal}
+              raised
+              containerStyle={{ marginBottom: 8 }}
+            />
             <Button
               title="Cancel"
               onPress={() => setWeightGoalModalVisible(false)}
@@ -441,7 +635,9 @@ const EditProfileScreen = () => {
       </Modal>
 
       <Modal
-        onDismiss={() => {setWeightClassModalVisible(false)}}
+        onDismiss={() => {
+          setWeightClassModalVisible(false);
+        }}
         animationType="slide"
         transparent={true}
         visible={weightClassModalVisible}
@@ -449,12 +645,17 @@ const EditProfileScreen = () => {
       >
         {/* Weight Class Modal Content */}
         <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text>Edit Weight Class</Text>
-            <TextInput
-              value={newWeightClass}
-              onChangeText={setNewWeightClass}
-              placeholder="Enter new weight class"
+          <View style={[styles.modalContent, { width: "90%", height: 400 }]}>
+            <Text style={styles.header2}>Edit Weight Class</Text>
+            <RNPickerSelect
+              placeholder={{
+                label: "Choose a weight class...",
+                value: null,
+                color: "grey",
+              }}
+              onValueChange={handleWeightClassSelection}
+              items={getWeightClasses()}
+              value={weightClass}
             />
             <Button title="Save" onPress={saveWeightClass} />
             <Button
@@ -486,7 +687,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontFamily: "Montserrat-Regular",
     alignItems: "center",
-    marginBottom: 12
+    marginBottom: 12,
   },
 
   editInformationContainer: {

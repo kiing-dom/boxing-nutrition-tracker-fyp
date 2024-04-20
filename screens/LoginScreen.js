@@ -1,6 +1,6 @@
-import { StyleSheet, View, KeyboardAvoidingView, Alert, ActivityIndicator, Text} from "react-native";
+import { StyleSheet, View, KeyboardAvoidingView, Alert, ActivityIndicator, Text, Image} from "react-native";
 import React, { useState, useEffect } from "react";
-import { Button, Input, Icon } from "@rneui/themed";
+import { Button, Input, Icon} from "@rneui/themed";
 import { StatusBar } from "expo-status-bar";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../firebaseConfig";
@@ -79,9 +79,9 @@ const LoginScreen = ({ navigation }) => {
 
   // Render the login screen content after fonts are loaded
   return (
-    <KeyboardAvoidingView backgroundColor='#FFFFFF' behavior="padding" style={styles.container}>
+    <KeyboardAvoidingView backgroundColor='#FFFAFA' behavior="padding" style={styles.container}>
       <StatusBar style="light" />
-      <Icon name="lock-closed" type="ionicon" color="#002FF5" size={150} />
+      <Image source={require('../assets/logos/transparent-icon.png')} style={{width: 300, height: 300}} />
       <View style={styles.inputContainer}>
         <TextInput
           label={<Text style={{fontFamily: "Montserrat-Regular"}}>Email</Text>}
@@ -105,15 +105,15 @@ const LoginScreen = ({ navigation }) => {
         raised
         buttonStyle={{ backgroundColor: "#002FF5" }}
         onPress={logIn}
-        containerStyle={styles.button}
+        containerStyle={[styles.button, { backgroundColor: "#0022ff" }]}
         title="Login"
-        titleStyle={{ fontFamily: 'Montserrat-Regular' }}
+        titleStyle={{ fontFamily: 'Montserrat-Regular', fontSize: 32 }}
       />
       {/* Register Button */}
       <Button
         raised
         buttonStyle={{ borderColor: "#002FF5", backgroundColor: "transparent" }}
-        titleStyle={{ color: "#002FF5", fontFamily: 'Montserrat-Regular' }}
+        titleStyle={{ color: "#002FF5", fontFamily: 'Montserrat-Regular', fontSize: 32 }}
         onPress={() => navigation.navigate("Profile Creation")}
         containerStyle={styles.button}
         title="Register"
@@ -139,7 +139,8 @@ const styles = StyleSheet.create({
   button: {
     marginTop: 10,
     borderRadius: 5,
-    width: 200
+    width: 250,
+    height: 64
   },
   loadingContainer: {
     flex: 1,

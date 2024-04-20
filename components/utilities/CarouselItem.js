@@ -9,6 +9,7 @@ const CarouselItem = ({ item }) => {
       <Image
         source={item.image}
         style={[styles.image, { width: width * 0.75 }]}
+        fadeDuration={0}
       />
     </View>
   );

@@ -162,6 +162,7 @@ const Suggestions = () => {
       <Card containerStyle={[styles.cardContainer, { width: "90%" }]}>
         <View style={styles.flatListContainer}>
           <FlatList
+            pointerEvents="none" // Add this line to disable touch events
             ref={mealFlatListRef}
             data={MealSlides}
             renderItem={({ item }) => <CarouselItem item={item} />}
@@ -171,9 +172,16 @@ const Suggestions = () => {
             pagingEnabled
             bounces={false}
             onMomentumScrollEnd={() => {
-              setSlideIndex(
-                Math.ceil(mealFlatListRef.current.contentOffset.x / windowWidth)
-              );
+              if (
+                mealFlatListRef.current &&
+                mealFlatListRef.current.contentOffset
+              ) {
+                setSlideIndex(
+                  Math.ceil(
+                    mealFlatListRef.current.contentOffset.x / windowWidth
+                  )
+                );
+              }
             }}
           />
         </View>
@@ -192,6 +200,7 @@ const Suggestions = () => {
       <Card containerStyle={[styles.cardContainer, { width: "90%" }]}>
         <View style={styles.flatListContainer}>
           <FlatList
+            pointerEvents="none"
             ref={trainingFlatListRef}
             data={TrainingSlides}
             renderItem={({ item }) => <CarouselItem item={item} />}
@@ -201,11 +210,16 @@ const Suggestions = () => {
             pagingEnabled
             bounces={false}
             onMomentumScrollEnd={() => {
-              setSlideIndex(
-                Math.ceil(
-                  trainingFlatListRef.current.contentOffset.x / windowWidth
-                )
-              );
+              if (
+                trainingFlatListRef.current &&
+                trainingFlatListRef.current.contentOffset
+              ) {
+                setSlideIndex(
+                  Math.ceil(
+                    trainingFlatListRef.current.contentOffset.x / windowWidth
+                  )
+                );
+              }
             }}
           />
         </View>

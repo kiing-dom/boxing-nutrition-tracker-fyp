@@ -19,7 +19,7 @@ import {
   doc,
 } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
-import { Card, Divider, Button } from "@rneui/themed";
+import { Card, Divider, Button, Icon } from "@rneui/themed";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SplashScreen from "expo-splash-screen";
 import { loadAsync } from "expo-font";
@@ -381,14 +381,13 @@ const LogMealScreen = () => {
       showsVerticalScrollIndicator={false}
     >
       <View style={styles.container}>
-        <Card containerStyle={[styles.card, {marginTop: 24}]}>
+        <Card containerStyle={[styles.card, {marginTop: 24, height: 112}]}>
           <Text style={styles.cardTitle}>Calories Remaining</Text>
           <Divider style={{ marginBottom: 10 }} />
           <Text style={{ fontFamily: "Montserrat-Regular", fontSize: 12 }}>
             Calories remaining are calculated by subtracting the calories from food from the daily calorie goal.
           </Text>
           <Text style={{ fontFamily: "Montserrat-SemiBold", fontSize: 16, alignSelf: "center"}}>
-            {tdee} - {totalCaloriesConsumed} = {remainingCalories}
           </Text>
         </Card>
 
@@ -396,13 +395,11 @@ const LogMealScreen = () => {
           <Card key={mealIndex} containerStyle={styles.card}>
             <View style={styles.mealHeader}>
               <Text style={styles.mealCardTitle}>Meal {mealIndex + 1}</Text>
-              <TouchableOpacity onPress={() => handleRemoveMeal(mealIndex)}>
-                <MaterialCommunityIcons
-                  name="trash-can-outline"
-                  size={24}
-                  color="red"
-                />
-              </TouchableOpacity>
+              <Button 
+                icon={<Icon name="trash-can-outline" size={24} color="red" type="material-community"/>}
+                type="clear"
+                onPress={() => handleRemoveMeal(mealIndex)}
+              />
             </View>
             <Divider style={{ marginTop: 4 }} />
             {mealData[mealIndex]?.map((item, foodIndex) => (
@@ -417,11 +414,11 @@ const LogMealScreen = () => {
                       {item.calories}kcal
                     </Text>
                   </View>
-                  <TouchableOpacity
+                  <Button
+                    type="clear" 
                     onPress={() => handleRemoveFood(mealIndex, foodIndex)}
-                  >
-                    <Text style={styles.removeButton}>x</Text>
-                  </TouchableOpacity>
+                    icon={<Icon name="remove" size={24} color="red" type="font-awesome"/>}
+                  />
                 </View>
               </TouchableOpacity>
             ))}
@@ -429,7 +426,7 @@ const LogMealScreen = () => {
             
               <Button
                 title="Add Food"
-                titleStyle={{fontFamily: "Monteserrat-Regular"}}
+                titleStyle={{fontFamily: "Montserrat-Regular"}}
                 onPress={() => handleAddFoodButtonClicked(mealIndex)}
                 containerStyle={{ width: 100, marginTop: 10, alignSelf:"center", borderRadius: 15 }}
                 color="#0022ff"
