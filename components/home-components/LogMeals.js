@@ -42,7 +42,7 @@ const LogMealScreen = () => {
     carbohydrates: "",
     fats: "",
   });
-  const [mealData, setMealData] = useState([[]]);
+  const [mealData, setMealData] = useState(Array.from({ length: 3 }, () => []));
   const [totalCaloriesConsumed] = useState(0)
   const [mealCount, setMealCount] = useState(3);
   const [loading, setLoading] = useState(true);
@@ -114,48 +114,53 @@ const LogMealScreen = () => {
   // Calculate remaining calories
   // Update the remainingCalories state in the context
   useEffect(() => {
+    const calculateRemainingNutrients = () => {
+        if (mealData) {
+            // Calculate total calories consumed
+            let totalCaloriesConsumed = 0;
+            mealData.forEach((meal) => {
+                meal.forEach((food) => {
+                    totalCaloriesConsumed += Math.floor(parseFloat(food.calories));
+                });
+            });
 
-    // Calculate total calories consumed
-  let totalCaloriesConsumed = 0;
-  mealData.forEach((meal) => {
-    meal.forEach((food) => {
-      totalCaloriesConsumed += Math.floor(parseFloat(food.calories));
-    });
-  });
-    // Calculate total protein, carbohydrates, and fats consumed
-    const totalProteinConsumed = mealData.reduce((total, meal) => {
-      return (
-        total +
-        meal.reduce((mealTotal, food) => {
-          return mealTotal + parseFloat(food.protein);
-        }, 0)
-      );
-    }, 0);
+            // Calculate total protein, carbohydrates, and fats consumed
+            const totalProteinConsumed = mealData.reduce((total, meal) => {
+                return (
+                    total +
+                    meal.reduce((mealTotal, food) => {
+                        return mealTotal + parseFloat(food.protein);
+                    }, 0)
+                );
+            }, 0);
 
-    const totalCarbsConsumed = mealData.reduce((total, meal) => {
-      return (
-        total +
-        meal.reduce((mealTotal, food) => {
-          return mealTotal + parseFloat(food.carbohydrates);
-        }, 0)
-      );
-    }, 0);
+            const totalCarbsConsumed = mealData.reduce((total, meal) => {
+                return (
+                    total +
+                    meal.reduce((mealTotal, food) => {
+                        return mealTotal + parseFloat(food.carbohydrates);
+                    }, 0)
+                );
+            }, 0);
 
-    const totalFatsConsumed = mealData.reduce((total, meal) => {
-      return (
-        total +
-        meal.reduce((mealTotal, food) => {
-          return mealTotal + parseFloat(food.fats);
-        }, 0)
-      );
-    }, 0);
+            const totalFatsConsumed = mealData.reduce((total, meal) => {
+                return (
+                    total +
+                    meal.reduce((mealTotal, food) => {
+                        return mealTotal + parseFloat(food.fats);
+                    }, 0)
+                );
+            }, 0);
 
-    setRemainingProtein(Math.floor((tdee * 0.15) / 4) - totalProteinConsumed);
-    setRemainingCarbs(Math.floor((tdee * 0.6) / 4) - totalCarbsConsumed);
-    setRemainingFat(Math.floor((tdee * 0.25) / 9) - totalFatsConsumed);
-    setRemainingCalories(Math.floor(tdee - totalCaloriesConsumed));
-  }, [mealData, tdee]);
+            setRemainingProtein(Math.floor((tdee * 0.15) / 4) - totalProteinConsumed);
+            setRemainingCarbs(Math.floor((tdee * 0.6) / 4) - totalCarbsConsumed);
+            setRemainingFat(Math.floor((tdee * 0.25) / 9) - totalFatsConsumed);
+            setRemainingCalories(Math.floor(tdee - totalCaloriesConsumed));
+        }
+    };
 
+    calculateRemainingNutrients();
+}, [mealData, tdee]);
   // Function to handle search button click
   const handleSearch = async () => {
     // Call the searchFood function with the search query
