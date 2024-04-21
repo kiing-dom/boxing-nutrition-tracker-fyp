@@ -12,12 +12,15 @@ import {
 import {
   getDocs,
   collection,
+  collectionGroup,
   query,
   where,
   addDoc,
   deleteDoc,
   doc,
+  serverTimestamp,
 } from "firebase/firestore";
+import { startOfDay, endOfDay, isSameDay } from 'date-fns';
 import { db } from "../../firebaseConfig";
 import { Card, Divider, Button, Icon } from "@rneui/themed";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -61,6 +64,15 @@ const LogMealScreen = () => {
   );
   const { remainingFat, setRemainingFat } = useContext(RemainingFatsContext);
 
+  // Get the current date
+const today = new Date();
+
+// Calculate the start of the day (midnight) for today
+const startOfToday = startOfDay(today);
+
+// Calculate the end of the day (11:59:59 PM) for today
+const endOfToday = endOfDay(today);
+
   useEffect(() => {
     const preventHide = SplashScreen.preventAutoHideAsync();
 
@@ -83,23 +95,67 @@ const LogMealScreen = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
+        console.log("Fetching user data...");
+  
         const userToken = await AsyncStorage.getItem("userToken");
         if (userToken) {
           setLoading(true);
+          console.log("User token found:", userToken);
+  
           const userRef = collection(db, "users");
+          console.log("User reference:", userRef);
+  
           const querySnapshot = await getDocs(
             query(userRef, where("uid", "==", JSON.parse(userToken).uid))
           );
-
+          console.log("Query snapshot:", querySnapshot);
+  
           if (!querySnapshot.empty) {
+            console.log("User data found.");
+  
             const userData = querySnapshot.docs[0].data();
+            console.log("User data:", userData);
             setTdee(userData.tdee);
+  
+            const userDocId = querySnapshot.docs[0].id;
+  
+            // Construct a query for the collection group "foods" where the document ID matches the user's document ID
+            const foodsQuery = query(
+              collectionGroup(db, "foods"),
+              where("__name__", ">=", `users/${userDocId}/`)
+            );
+  
+            console.log("Foods query:", foodsQuery);
+  
+            const foodsSnapshot = await getDocs(foodsQuery);
+            console.log("Foods snapshot:", foodsSnapshot.docs);
+  
+            // Process the fetched foods data and filter based on timestamp
+            const currentDate = new Date();
+            const mealData = Array.from({ length: 3 }, () => []); // Initialize mealData array
+  
+            foodsSnapshot.docs.forEach(foodDoc => {
+              const foodData = foodDoc.data();
+              const mealIndex = foodData.mealIndex; // Get mealIndex from food document
+  
+              if (isSameDay(foodData.timestamp.toDate(), currentDate)) { // Filter based on timestamp
+                mealData[mealIndex] = [...mealData[mealIndex], { id: foodDoc.id, ...foodData }];
+              }
+            });
+  
+            // Update state or perform other actions with mealData
+            console.log("Meal data:", mealData);
+  
+            // Set mealData state
+            setMealData(mealData);
           } else {
             // Handle case where user data not found
+            console.log("User data not found.");
           }
           setLoading(false);
         } else {
           // No user token found, navigate to login
+          console.log("No user token found. Navigating to login...");
           navigation.navigate("Login");
         }
       } catch (error) {
@@ -107,10 +163,12 @@ const LogMealScreen = () => {
         // Handle error
       }
     };
-
+  
     fetchUserData();
   }, []);
+  
 
+  
   // Calculate remaining calories
   // Update the remainingCalories state in the context
   useEffect(() => {
@@ -208,7 +266,7 @@ const LogMealScreen = () => {
     if (selectedMealIndex !== null) {
       // Extract all nutrition data from foodData
       const { name, calories, protein, carbohydrates, fats } = foodData;
-
+  
       try {
         const userToken = await AsyncStorage.getItem("userToken");
         if (userToken) {
@@ -216,30 +274,30 @@ const LogMealScreen = () => {
           const querySnapshot = await getDocs(
             query(userRef, where("uid", "==", JSON.parse(userToken).uid))
           );
-
+  
           if (!querySnapshot.empty) {
             const userDocRef = querySnapshot.docs[0].ref;
-
+  
             // Create a subcollection within the user's document for meals
-            const mealCollectionRef = collection(userDocRef, "meals");
-
-            // Add the new food to the selected meal's array
-            await addDoc(mealCollectionRef, {
+            const mealCollectionRef = collection(userDocRef, "meals", (selectedMealIndex).toString(), "foods");
+  
+            // Add the new food to the selected meal's subcollection
+            const foodDocRef = await addDoc(mealCollectionRef, {
               name,
               calories,
               protein,
               carbohydrates,
               fats,
+              timestamp: serverTimestamp(), // Add timestamp
+              mealIndex: selectedMealIndex
             });
-
+  
             // Update the state with the modified mealData
             const newMealData = [...mealData];
-            newMealData[selectedMealIndex] = [
-              ...(newMealData[selectedMealIndex] || []),
-              { name, calories, protein, carbohydrates, fats },
-            ];
+            newMealData[selectedMealIndex] = newMealData[selectedMealIndex] || []; // Ensure array exists
+            newMealData[selectedMealIndex].push({ id: foodDocRef.id, name, calories, protein, carbohydrates, fats }); // Store food ID for potential future reference
             setMealData(newMealData);
-
+  
             // Reset the foodData state
             setFoodData({
               name: "",
@@ -248,7 +306,7 @@ const LogMealScreen = () => {
               carbohydrates: "",
               fats: "",
             });
-
+  
             // Close the modal
             setModalVisible(false);
             // Reset the selected meal index
@@ -269,7 +327,7 @@ const LogMealScreen = () => {
       Alert.alert("Error", "Please select a meal to add food to.");
     }
   };
-
+  
   const handleAddFoodFromSearch = (food) => {
     setFoodData({
       name: food.name,
@@ -295,32 +353,32 @@ const LogMealScreen = () => {
         const querySnapshot = await getDocs(
           query(userRef, where("uid", "==", JSON.parse(userToken).uid))
         );
-
+  
         if (!querySnapshot.empty) {
           const userDocRef = querySnapshot.docs[0].ref;
-
-          // Reference the "meals" subcollection
-          const mealCollectionRef = collection(userDocRef, "meals");
-
+  
+          // Reference the subcollection corresponding to the selected meal index
+          const mealIndexCollectionRef = collection(userDocRef, "meals", (mealIndex).toString(), "foods");
+  
           // Get the document ID of the food item to delete
-          const mealSnapshot = await getDocs(mealCollectionRef);
+          const mealSnapshot = await getDocs(mealIndexCollectionRef);
           const mealDocs = mealSnapshot.docs;
-          const foodDocId = mealDocs[mealIndex].id;
-
-          // Delete the food item document from the "meals" subcollection
-          await deleteDoc(doc(mealCollectionRef, foodDocId));
-
+          const foodDocId = mealDocs[foodIndex].id;
+  
+          // Delete the food item document from the subcollection
+          await deleteDoc(doc(mealIndexCollectionRef, foodDocId));
+  
           // Retrieve the mealData from state
           const updatedMealData = [...mealData];
-
+  
           // Remove the selected food from mealData
           updatedMealData[mealIndex] = updatedMealData[mealIndex].filter(
             (_, index) => index !== foodIndex
           );
-
+  
           // Update the state with the modified mealData
           setMealData(updatedMealData);
-
+  
           // Close the modal
           setModalVisible(false);
         } else {
@@ -335,6 +393,7 @@ const LogMealScreen = () => {
       // Handle error
     }
   };
+  
 
   const handleRemoveMeal = (mealIndex) => {
     Alert.alert(

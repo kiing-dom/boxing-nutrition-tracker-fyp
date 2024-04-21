@@ -14,6 +14,7 @@ import {
   where,
   updateDoc,
   doc,
+  collectionGroup
 } from "firebase/firestore";
 import { TextInput, ProgressBar, Modal } from "react-native-paper";
 import { db } from "../../firebaseConfig";
@@ -27,7 +28,7 @@ import RemainingProteinContext from "../../contexts/RemainingProteinContext";
 import RemainingFatsContext from "../../contexts/RemainingFatsContext";
 import { AnimatedCircularProgress } from "react-native-circular-progress";
 import { LineChart } from "react-native-gifted-charts";
-import { startOfDay, isEqual } from "date-fns";
+import { startOfDay, isEqual, isSameDay } from "date-fns";
 
 const Dashboard = () => {
   const [mealData, setMealData] = useState([[]]);
@@ -86,7 +87,7 @@ const Dashboard = () => {
           const querySnapshot = await getDocs(
             query(userRef, where("uid", "==", parsedToken.uid))
           );
-
+  
           if (!querySnapshot.empty) {
             const userData = querySnapshot.docs[0].data();
             setTdee(userData.tdee);
@@ -103,6 +104,9 @@ const Dashboard = () => {
               }));
             setWeightData(weightHistory);
             setLineData(processedLineData); // Set lineData here
+  
+            // Fetch meal data
+            fetchMealData(querySnapshot.docs[0].id);
           } else {
             // Handle case where user data not found
           }
@@ -115,11 +119,56 @@ const Dashboard = () => {
         // Handle error
       }
     };
-
+  
+    const fetchMealData = async (userDocId) => {
+      try {
+        // Construct a query for the collection group "foods" where the document ID matches the user's document ID
+        const foodsQuery = query(
+          collectionGroup(db, "foods"),
+          where("__name__", ">=", `users/${userDocId}/`)
+        );
+  
+        console.log("Foods query:", foodsQuery);
+  
+        const foodsSnapshot = await getDocs(foodsQuery);
+        console.log("Foods snapshot:", foodsSnapshot.docs);
+  
+        // Process the fetched foods data and filter based on timestamp
+        const currentDate = new Date();
+        const mealData = Array.from({ length: 3 }, () => []); // Initialize mealData array
+  
+        foodsSnapshot.docs.forEach(foodDoc => {
+          const foodData = foodDoc.data();
+          const mealIndex = foodData.mealIndex; // Get mealIndex from food document
+  
+          if (isSameDay(foodData.timestamp.toDate(), currentDate)) { // Filter based on timestamp
+            mealData[mealIndex] = [...mealData[mealIndex], { id: foodDoc.id, ...foodData }];
+          }
+        });
+  
+        // Update state or perform other actions with mealData
+        console.log("Meal data:", mealData);
+  
+        // Set mealData state
+        setMealData(mealData);
+      } catch (error) {
+        console.error("Error fetching meal data:", error);
+        // Handle error
+      }
+    };
+  
     fetchUserData();
   }, []);
 
   useEffect(() => {
+    
+    let totalCaloriesConsumed = 0;
+            mealData.forEach((meal) => {
+                meal.forEach((food) => {
+                    totalCaloriesConsumed += Math.floor(parseFloat(food.calories));
+                });
+            });
+
     // Calculate total protein, carbohydrates, and fats consumed
     const totalProteinConsumed = mealData.reduce((total, meal) => {
       return (
