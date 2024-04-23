@@ -14,9 +14,9 @@ import {
   where,
   updateDoc,
   doc,
-  collectionGroup
+  collectionGroup,
 } from "firebase/firestore";
-import { TextInput, ProgressBar, Modal } from "react-native-paper";
+import { TextInput, ProgressBar, Modal} from "react-native-paper";
 import { db } from "../../firebaseConfig";
 import { Card, Divider, Button, ButtonGroup, Icon } from "@rneui/themed";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -29,6 +29,7 @@ import RemainingFatsContext from "../../contexts/RemainingFatsContext";
 import { AnimatedCircularProgress } from "react-native-circular-progress";
 import { LineChart } from "react-native-gifted-charts";
 import { startOfDay, isEqual, isSameDay } from "date-fns";
+import { Calendar } from "react-native-calendars";
 
 const Dashboard = () => {
   const [mealData, setMealData] = useState([[]]);
@@ -43,6 +44,11 @@ const Dashboard = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [newWeight, setNewWeight] = useState("");
   const [phaseIndex, setPhaseIndex] = useState(1);
+
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [mealDataForDate, setMealDataForDate] = useState([]);
+  const [isCalendarModalVisible, setIsCalendarModalVisible] = useState(false);
+  const [isMealModalVisible, setIsMealModalVisible] = useState(false);
 
   const prevMealDataRef = useRef();
 
@@ -87,7 +93,7 @@ const Dashboard = () => {
           const querySnapshot = await getDocs(
             query(userRef, where("uid", "==", parsedToken.uid))
           );
-  
+
           if (!querySnapshot.empty) {
             const userData = querySnapshot.docs[0].data();
             setTdee(userData.tdee);
@@ -104,7 +110,7 @@ const Dashboard = () => {
               }));
             setWeightData(weightHistory);
             setLineData(processedLineData); // Set lineData here
-  
+
             // Fetch meal data
             fetchMealData(querySnapshot.docs[0].id);
           } else {
@@ -119,7 +125,7 @@ const Dashboard = () => {
         // Handle error
       }
     };
-  
+
     const fetchMealData = async (userDocId) => {
       try {
         // Construct a query for the collection group "foods" where the document ID matches the user's document ID
@@ -127,28 +133,32 @@ const Dashboard = () => {
           collectionGroup(db, "foods"),
           where("__name__", ">=", `users/${userDocId}/`)
         );
-  
+
         console.log("Foods query:", foodsQuery);
-  
+
         const foodsSnapshot = await getDocs(foodsQuery);
         console.log("Foods snapshot:", foodsSnapshot.docs);
-  
+
         // Process the fetched foods data and filter based on timestamp
         const currentDate = new Date();
         const mealData = Array.from({ length: 3 }, () => []); // Initialize mealData array
-  
-        foodsSnapshot.docs.forEach(foodDoc => {
+
+        foodsSnapshot.docs.forEach((foodDoc) => {
           const foodData = foodDoc.data();
           const mealIndex = foodData.mealIndex; // Get mealIndex from food document
-  
-          if (isSameDay(foodData.timestamp.toDate(), currentDate)) { // Filter based on timestamp
-            mealData[mealIndex] = [...mealData[mealIndex], { id: foodDoc.id, ...foodData }];
+
+          if (isSameDay(foodData.timestamp.toDate(), currentDate)) {
+            // Filter based on timestamp
+            mealData[mealIndex] = [
+              ...mealData[mealIndex],
+              { id: foodDoc.id, ...foodData },
+            ];
           }
         });
-  
+
         // Update state or perform other actions with mealData
         console.log("Meal data:", mealData);
-  
+
         // Set mealData state
         setMealData(mealData);
       } catch (error) {
@@ -156,18 +166,17 @@ const Dashboard = () => {
         // Handle error
       }
     };
-  
+
     fetchUserData();
   }, []);
 
   useEffect(() => {
-    
     let totalCaloriesConsumed = 0;
-            mealData.forEach((meal) => {
-                meal.forEach((food) => {
-                    totalCaloriesConsumed += Math.floor(parseFloat(food.calories));
-                });
-            });
+    mealData.forEach((meal) => {
+      meal.forEach((food) => {
+        totalCaloriesConsumed += Math.floor(parseFloat(food.calories));
+      });
+    });
 
     // Calculate total protein, carbohydrates, and fats consumed
     const totalProteinConsumed = mealData.reduce((total, meal) => {
@@ -342,6 +351,60 @@ const Dashboard = () => {
     }
   };
 
+  // Function to handle date selection from calendar
+  const handleDateSelect = (date) => {
+    setIsMealModalVisible(true);
+    setSelectedDate(date.dateString);
+    // Fetch and set meal data for the selected date
+    fetchMealDataForDate(date.dateString);
+  };
+
+  // Function to fetch meal data for the selected date
+  // Function to fetch meal data for the selected date
+const fetchMealDataForDate = async (date) => {
+  try {
+    // Convert the selected date string to a JavaScript Date object
+    const selectedDate = new Date(date);
+
+    // Construct the timestamp for the start of the selected date
+    const startOfDayTimestamp = new Date(
+      selectedDate.getFullYear(),
+      selectedDate.getMonth(),
+      selectedDate.getDate()
+    );
+
+    // Construct a query to fetch meal data for the selected date using collectionGroup
+    const foodsQuery = query(
+      collectionGroup(db, "foods"), // Assuming the collection name is "foods"
+      where("timestamp", ">=", startOfDayTimestamp), // Filter for timestamps on or after the start of the selected date
+      where("timestamp", "<", new Date(startOfDayTimestamp.getTime() + 24 * 60 * 60 * 1000)) // Filter for timestamps before the next day
+    );
+
+    // Execute the query
+    const querySnapshot = await getDocs(foodsQuery);
+
+    // Process the query snapshot to get the meal data
+    const mealsForDate = Array.from({ length: 3 }, () => []); // Initialize meal data array
+
+    querySnapshot.forEach((foodDoc) => {
+      const foodData = foodDoc.data();
+      const mealIndex = foodData.mealIndex; // Get mealIndex from food document
+      mealsForDate[mealIndex] = [
+        ...mealsForDate[mealIndex],
+        { id: foodDoc.id, ...foodData },
+      ];
+    });
+
+    // Set the meal data for the selected date
+    setMealDataForDate(mealsForDate);
+    console.log(mealDataForDate)
+  } catch (error) {
+    console.error("Error fetching meal data:", error);
+    // Handle error
+  }
+};
+
+
   const renderContent = () => {
     if (loading) {
       return (
@@ -361,7 +424,17 @@ const Dashboard = () => {
 
       return (
         <View style={styles.container}>
-          <Text style={{ ...styles.heading, marginTop: 12 }}>Today</Text>
+          <View style={{ flexDirection: "row" }}>
+            <Text style={{ ...styles.heading, marginTop: 12 }}>Today</Text>
+            <Button
+              containerStyle={{ marginTop: 10 }}
+              type="clear"
+              icon={<Icon name="calendar-month" type="material-community" />}
+              onPress={() => setIsCalendarModalVisible(true)}
+            />
+          </View>
+          {/* Modal for displaying meal information */}
+          {/* Modal for displaying calendar */}
 
           {/* Display Calories */}
           <Card containerStyle={styles.container1}>
@@ -447,7 +520,11 @@ const Dashboard = () => {
                 </View>
 
                 <View style={{ flexDirection: "row", marginLeft: -8 }}>
-                  <Icon name="cupcake" type="material-community" style={{ marginRight: 4 }} />
+                  <Icon
+                    name="cupcake"
+                    type="material-community"
+                    style={{ marginRight: 4 }}
+                  />
                   <Text style={styles.cardSubTitle}>
                     Fat ({Math.floor(remainingFat)}g left){"\n"}
                     <ProgressBar
@@ -485,7 +562,7 @@ const Dashboard = () => {
               />
             </Card>
           </TouchableOpacity>
-
+          {/** Modal For Weight Update*/}
           <Modal
             visible={isModalVisible}
             onDismiss={() => setIsModalVisible(false)}
@@ -515,6 +592,57 @@ const Dashboard = () => {
               </View>
             </View>
           </Modal>
+
+          {/** Modal For Calendar */}
+          <Modal
+            visible={isCalendarModalVisible}
+            animationType="slide"
+            onDismiss={() => setIsCalendarModalVisible(false)}
+            contentContainerStyle={styles.modalContent}
+          >
+            <View style={styles.modalView}>
+              <Text style={styles.modalTitle}>Select Date</Text>
+              <Calendar onDayPress={handleDateSelect} />
+              <View style={styles.buttonContainer}>
+                <Button
+                  mode="contained"
+                  onPress={() => setIsCalendarModalVisible(false)}
+                >
+                  Close
+                </Button>
+              </View>
+            </View>
+          </Modal>
+
+
+          <Modal
+  visible={isMealModalVisible}
+  animationType="slide"
+  onDismiss={() => setIsMealModalVisible(false)}
+  contentContainerStyle={styles.modalContent}
+>
+  <View style={styles.modalView}>
+    <Text style={styles.modalTitle}>Meal Data for Selected Date:</Text>
+    {mealDataForDate.map((meal, index) => (
+      <View key={index}>
+        <Text style={{ fontFamily: "Montserrat-SemiBold", fontSize: 16 }} >Meal {index + 1}:</Text>
+        {meal.map((food) => (
+          <View key={food.id}>
+            <Text style={{fontFamily: "Montserrat-SemiBold", fontSize: 12 }}  >{food.name}</Text>
+            <Text style={{fontFamily: "Montserrat-Regular", fontSize: 12 }}>Carbs: {food.carbohydrates}g</Text>
+            <Text style={{fontFamily: "Montserrat-Regular", fontSize: 12 }}>Protein: {food.protein}g</Text>
+            <Text style={{fontFamily: "Montserrat-Regular", fontSize: 12 }}>Fats: {food.fats}g</Text>
+            <Text style={{fontFamily: "Montserrat-Regular", fontSize: 12 }}>Calories: {food.calories} kcal </Text>
+          </View>
+        ))}
+        <Divider style={{marginBottom: 24, width: 200}} />
+      </View>
+    ))}
+    <Button onPress={() => setIsMealModalVisible(false)}>Close</Button>
+  </View>
+</Modal>
+
+
           <Divider />
         </View>
       );
@@ -569,12 +697,18 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     width: "100%",
   },
+  modalContainer: {
+    width: "80%",
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   modalContent: {
-    backgroundColor: "white",
     padding: 20,
     margin: 20,
     borderRadius: 10,
     elevation: 4,
+    backgroundColor: "white"
   },
   modalView: {
     alignItems: "center",
