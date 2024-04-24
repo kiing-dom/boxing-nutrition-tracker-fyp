@@ -56,7 +56,6 @@ const LoginScreen = ({ navigation }) => {
       const user = userCredential.user;
 
       await AsyncStorage.setItem('userToken', JSON.stringify(user));
-      navigation.navigate("Home");
     } catch (error) {
       console.error("Login error:", error);
       Alert.alert(

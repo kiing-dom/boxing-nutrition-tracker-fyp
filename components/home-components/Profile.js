@@ -93,7 +93,7 @@ const Profile = ({ navigation }) => {
     return () => unsubscribe();
   }, []);
 
-  const handleSignOut = () => {
+  const handleSignOut = async () => {
     Alert.alert("Sign Out", "Are you sure you want to sign out?", [
       { text: "Cancel", onPress: () => {}, style: "cancel" },
       {
@@ -102,7 +102,6 @@ const Profile = ({ navigation }) => {
           try {
             await signOut(auth);
             await AsyncStorage.removeItem("userToken");
-            navigation.navigate("Login");
           } catch (error) {
             console.error("Error during sign out:", error);
             // Handle error

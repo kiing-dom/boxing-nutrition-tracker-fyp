@@ -5,7 +5,8 @@ import { Input, Text, Button } from "@rneui/themed";
 import RNPickerSelect from "react-native-picker-select";
 import { TextInput } from "react-native-paper";
 import { loadAsync } from "expo-font";
-import * as SplashScreen from 'expo-splash-screen' 
+import * as SplashScreen from 'expo-splash-screen'
+import DateTimePicker from "@mohalla-tech/react-native-date-time-picker";
 
 const PersonalInfoStep = ({
   age,
@@ -26,6 +27,26 @@ const PersonalInfoStep = ({
 }) => {
 
   const [fontsLoaded, setFontsLoaded] = useState(false);
+
+  const [dob, setDob] = useState(new Date()); // state to store date of birth
+
+  const calculateAge = (selectedDate) => {
+    const today = new Date();
+    const birthYear = selectedDate.getFullYear();
+    let calculatedAge = today.getFullYear() - birthYear;
+
+    const birthMonth = selectedDate.getMonth();
+    const currentMonth = today.getMonth();
+
+    if (currentMonth < birthMonth) {
+      calculatedAge--;
+    } else if (currentMonth === birthMonth && today.getDate() < selectedDate.getDate()) {
+      calculatedAge--;
+    }
+
+    setDob(selectedDate); // update dob state after calculation
+    handleAgeInput(calculatedAge.toString()); // update age with calculated value
+  };
 
   useEffect(() => {
     const preventHide = SplashScreen.preventAutoHideAsync();
@@ -52,24 +73,22 @@ const PersonalInfoStep = ({
 
   return (
     <View>
-      <Text style={{ fontSize: 20, marginBottom: 8, fontFamily: "Montserrat-SemiBold" }}>
+      <Text style={{ fontSize: 20, marginBottom: 16, fontFamily: "Montserrat-SemiBold" }}>
         Personal Information
       </Text>
       {/** Numerical Input to handle setting the user's age */}
-      <TextInput
-        label="Age..."
-        keyboardType="numeric"
-        value={age}
-        onChangeText={handleAgeInput}
-        mode="flat" // Optional: Set the text input mode (flat, outlined, or filled)
-        error={!isAgeValid && age !== ""}
-        style={{ marginTop: 0, marginBottom: 24 }}
-        contentStyle={{ fontFamily: "Montserrat-Regular" }}
+      
+    <Text style={{fontFamily: "Montserrat-SemiBold", fontSize: 16, marginBottom: 8}}>Date of Birth</Text>
+      <DateTimePicker
+        value={dob}
+        mode="date" // set mode to date
+        displayFormat={'DD/MM/YYYY'} // customize display format (optional)
+        onChange={calculateAge}
+        containerStyle={{marginBottom: 8}}
       />
-
-      {isAgeValid === false && age !== "" && (
-        <Text style={{ color: "red", marginBottom: 8, marginTop: -16 }}>
-          Age must be between 16 and 120
+      {isAgeValid === false && (
+        <Text style={{ color: "red", marginBottom: 32, marginTop: -4 }}>
+          Enter a valid age (16+)
         </Text>
       )}
 
@@ -85,7 +104,7 @@ const PersonalInfoStep = ({
 
       {isCurrentWeightValid === false && currentWeight !== "" && (
         <Text style={{ color: "red", marginBottom: 8, marginTop: -16 }}>
-          Weight must be between 13 and 453
+          Enter a valid weight
         </Text>
       )}
 
