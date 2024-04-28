@@ -101,7 +101,6 @@ const LoginScreen = ({ navigation }) => {
       </View>
       {/* Login Button */}
       <Button
-        raised
         buttonStyle={{ backgroundColor: "#002FF5" }}
         onPress={logIn}
         containerStyle={[styles.button, { backgroundColor: "#0022ff" }]}

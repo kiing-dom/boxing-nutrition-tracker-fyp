@@ -34,6 +34,7 @@ import RemainingCaloriesContext from "../../contexts/RemainingCaloriesContext";
 import RemainingCarbsContext from "../../contexts/RemainingCarbsContext";
 import RemainingProteinContext from "../../contexts/RemainingProteinContext";
 import RemainingFatsContext from "../../contexts/RemainingFatsContext";
+import { NUTRITIONIX_API_KEY, NUTRITIONIX_APP_ID, NUTRITIONIX_URL} from '@env'
 
 const LogMealScreen = () => {
   const [fontsLoaded, setFontsLoaded] = useState(false);
@@ -226,9 +227,9 @@ const endOfToday = endOfDay(today);
   };
 
   const searchFood = async (query) => {
-    const appId = "ba6d21c8"; // Replace with your Nutritionix app ID
-    const appKey = "e548123dd00b118c47a0f384885b6039"; // Replace with your Nutritionix app key
-    const url = `https://trackapi.nutritionix.com/v2/natural/nutrients`;
+    const appId = NUTRITIONIX_APP_ID;
+    const appKey = NUTRITIONIX_API_KEY;
+    const url = NUTRITIONIX_URL;
 
     try {
       const response = await axios.post(

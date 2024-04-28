@@ -15,19 +15,26 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.kiing1dom.fytesize-boxing-nutrition"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/logos/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.kiing1dom.fytesize_boxing_nutrition"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
       "expo-font"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "e5d9f46a-5481-4a94-bfc9-be3cf08209a2"
+      }
+    }
   }
 }

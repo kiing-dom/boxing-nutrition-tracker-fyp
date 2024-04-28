@@ -18,6 +18,7 @@ import OpenAI from "openai";
 import MealSlides from "../../assets/slides/MealSlides.js";
 import CarouselItem from "../utilities/CarouselItem.js";
 import TrainingSlides from "../../assets/slides/TrainingSlides.js";
+import {OPENAI_API_KEY} from '@env';
 
 const Suggestions = () => {
   const [tdee, setTdee] = useState(null);
@@ -86,22 +87,26 @@ const Suggestions = () => {
   }, [slideIndex]);
 
   const openai = new OpenAI({
-    apiKey: "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",
+    apiKey: OPENAI_API_KEY,
   });
 
   const generateMealPlan = async () => {
     try {
       const response = await openai.completions.create({
         model: "gpt-3.5-turbo-instruct",
-        prompt: `Generate a meal plan (for a boxer so 4-6 meals for a day (Meal 1, 2, 3 etc...) show calories of each item and total calories too) for a person with current weight: ${currentWeight}, weight goal: ${weightGoal}, daily calorie goal: ${tdee}, gender: ${gender}.`,
+        prompt: `Generate a meal plan for a boxer (4-8 meals for a day (structured as Meal 1, 2, 3 etc...) and show the calories of each item and total calories at the end) for a person with 
+        current weight: ${currentWeight},
+         weight goal: ${weightGoal}, 
+         daily calorie goal: ${tdee}, 
+         gender: ${gender}.`,
         max_tokens: 600,
       });
 
       console.log("Response data:", response); // Add this line
 
       const data = response;
-      if (data && data.choices && data.choices.length > 0) {
-        setResponseText(data.choices[0].text);
+      if (data?.choices?.length > 0) {
+        setResponseText(data.choices[0]?.text);
         setModalVisible(true);
       } else {
         console.error("Invalid response format:", data);
@@ -123,13 +128,16 @@ const Suggestions = () => {
     try {
       const response = await openai.completions.create({
         model: "gpt-3.5-turbo-instruct",
-        prompt: `Generate a balanced boxing training plan (including rest days) for a person with current weight: ${currentWeight}, weight goal: ${weightGoal}, gender: ${gender}.`,
+        prompt: `Generate a balanced boxing 7 day training plan (including rest days) for a person with 
+        current weight: ${currentWeight}, 
+        weight goal: ${weightGoal}, 
+        gender: ${gender}.`,
         max_tokens: 800,
       });
 
       const data = response;
-      if (data && data.choices && data.choices.length > 0) {
-        setResponseText(data.choices[0].text);
+      if (data?.choices?.length > 0) {
+        setResponseText(data.choices[0]?.text);
         setModalVisible(true);
       } else {
         console.error("Invalid response format:", data);

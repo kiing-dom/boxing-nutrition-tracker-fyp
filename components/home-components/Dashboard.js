@@ -128,24 +128,18 @@ const Dashboard = () => {
 
     const fetchMealData = async (userDocId) => {
       try {
-        // Construct a query for the collection group "foods" where the document ID matches the user's document ID
         const foodsQuery = query(
           collectionGroup(db, "foods"),
           where("__name__", ">=", `users/${userDocId}/`)
         );
 
-        console.log("Foods query:", foodsQuery);
-
         const foodsSnapshot = await getDocs(foodsQuery);
-        console.log("Foods snapshot:", foodsSnapshot.docs);
-
-        // Process the fetched foods data and filter based on timestamp
         const currentDate = new Date();
-        const mealData = Array.from({ length: 3 }, () => []); // Initialize mealData array
+        const mealData = Array.from({ length: 3 }, () => []);
 
         foodsSnapshot.docs.forEach((foodDoc) => {
           const foodData = foodDoc.data();
-          const mealIndex = foodData.mealIndex; // Get mealIndex from food document
+          const mealIndex = foodData.mealIndex;
 
           if (isSameDay(foodData.timestamp.toDate(), currentDate)) {
             // Filter based on timestamp
@@ -156,10 +150,6 @@ const Dashboard = () => {
           }
         });
 
-        // Update state or perform other actions with mealData
-        console.log("Meal data:", mealData);
-
-        // Set mealData state
         setMealData(mealData);
       } catch (error) {
         console.error("Error fetching meal data:", error);
@@ -294,7 +284,6 @@ const Dashboard = () => {
         if (!querySnapshot.empty) {
           const userId = querySnapshot.docs[0].id;
           const userData = querySnapshot.docs[0].data();
-          console.log("userData:", userData); // Debugging line
 
           // Update current weight
           await updateDoc(doc(db, "users", userId), {
@@ -351,31 +340,24 @@ const Dashboard = () => {
     }
   };
 
-  // Function to handle date selection from calendar
   const handleDateSelect = (date) => {
     setIsMealModalVisible(true);
     setSelectedDate(date.dateString);
-    // Fetch and set meal data for the selected date
     fetchMealDataForDate(date.dateString);
   };
 
-  // Function to fetch meal data for the selected date
-  // Function to fetch meal data for the selected date
+
 const fetchMealDataForDate = async (date) => {
   try {
-    // Convert the selected date string to a JavaScript Date object
     const selectedDate = new Date(date);
 
-    // Construct the timestamp for the start of the selected date
     const startOfDayTimestamp = new Date(
       selectedDate.getFullYear(),
       selectedDate.getMonth(),
       selectedDate.getDate()
     );
-
-    // Construct a query to fetch meal data for the selected date using collectionGroup
     const foodsQuery = query(
-      collectionGroup(db, "foods"), // Assuming the collection name is "foods"
+      collectionGroup(db, "foods"),
       where("timestamp", ">=", startOfDayTimestamp), // Filter for timestamps on or after the start of the selected date
       where("timestamp", "<", new Date(startOfDayTimestamp.getTime() + 24 * 60 * 60 * 1000)) // Filter for timestamps before the next day
     );
@@ -462,11 +444,11 @@ const fetchMealDataForDate = async (date) => {
             <View style={[styles.cardContent, { flexDirection: "row" }]}>
               <AnimatedCircularProgress
                 rotation={0}
-                size={100} // Adjust size as needed
-                width={8} // Adjust line width as needed
-                fill={remainingPercentage} // Set fill based on remaining percentage
-                tintColor="#002FF5" // Customize tint color (optional)
-                backgroundColor="#d3d3d3" // Customize background color (optional)
+                size={100}
+                width={8}
+                fill={remainingPercentage}
+                tintColor="#002FF5"
+                backgroundColor="#d3d3d3"
               >
                 {/* Customize center content */}
                 {() => (

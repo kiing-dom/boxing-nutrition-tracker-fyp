@@ -12,6 +12,7 @@ import RegisterProfileStep from "../components/profile-creation-components/Regis
 import { app, auth } from "../firebaseConfig";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { getFirestore, addDoc, collection } from "firebase/firestore";
+import { COUNTRY_API_KEY, COUNTRY_URL } from '@env';
 
 const ProfileCreationScreen = ({ navigation }) => {
   // for step control
@@ -220,10 +221,10 @@ const ProfileCreationScreen = ({ navigation }) => {
   useEffect(() => {
     const config = {
       method: "get",
-      url: "https://api.countrystatecity.in/v1/countries",
+      url: COUNTRY_URL,
       headers: {
         "X-CSCAPI-KEY":
-          "eVdqbFJnRkVZWTN2MTc1T1FTZ1FBNHNmdHZ2d1I3bFFhMFhMb1BXcw==",
+          COUNTRY_API_KEY,
       },
     };
 
